@@ -1,0 +1,17 @@
+node_modules
+dist
+server/dist
+storage/uploads
+.env
+.tools
+.DS_Store
+coverage
+.vite
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dev.db
+dev.db-journal
+dev.db-shm
+dev.db-wal

@@ -1,0 +1,156 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aetheris | 我的快乐回忆</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-dim": "#a9beab",
+                    "surface-dim": "#0e0e0e",
+                    "secondary-fixed": "#e0f7e2",
+                    "primary-container": "#e08efe",
+                    "surface-container": "#191a1a",
+                    "error-container": "#8a1632",
+                    "surface-bright": "#2c2c2c",
+                    "on-tertiary-container": "#00535e",
+                    "primary-fixed": "#eaa9ff",
+                    "surface-container-highest": "#262626",
+                    "inverse-on-surface": "#565555",
+                    "secondary-fixed-dim": "#d2e8d4",
+                    "on-tertiary-fixed": "#003e47",
+                    "on-secondary-fixed": "#394c3d",
+                    "surface-tint": "#e7a1ff",
+                    "on-error-container": "#ff97a3",
+                    "tertiary-container": "#7be7f9",
+                    "inverse-surface": "#fcf9f8",
+                    "tertiary-dim": "#6cd8eb",
+                    "tertiary-fixed-dim": "#6cd8eb",
+                    "secondary": "#b6ccb8",
+                    "on-secondary-fixed-variant": "#556959",
+                    "primary-fixed-dim": "#e395ff",
+                    "on-surface": "#e7e5e4",
+                    "surface-container-low": "#131313",
+                    "on-primary-fixed-variant": "#6c1e8b",
+                    "on-tertiary-fixed-variant": "#005d69",
+                    "surface-variant": "#262626",
+                    "inverse-primary": "#893da7",
+                    "tertiary-fixed": "#7be7f9",
+                    "on-background": "#e7e5e4",
+                    "surface": "#0e0e0e",
+                    "on-primary-fixed": "#45005f",
+                    "primary-dim": "#d180ef",
+                    "on-primary-container": "#4f006c",
+                    "error-dim": "#c8475d",
+                    "secondary-container": "#172a1c",
+                    "outline-variant": "#484848",
+                    "on-secondary-container": "#94a997",
+                    "primary": "#e7a1ff",
+                    "outline": "#767575",
+                    "on-primary": "#5d097d",
+                    "background": "#0e0e0e",
+                    "surface-container-high": "#202020",
+                    "on-tertiary": "#005c68",
+                    "on-error": "#490013",
+                    "on-surface-variant": "#acabaa",
+                    "on-secondary": "#324536",
+                    "surface-container-lowest": "#000000",
+                    "tertiary": "#a8f1ff",
+                    "error": "#fd6f85"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0e;
+            color: #e7e5e4;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .nebula-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 30%, rgba(224, 142, 254, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(129, 236, 255, 0.1) 0%, transparent 40%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head><body class="bg-surface selection:bg-primary-container selection:text-on-primary-container">
+<div class="nebula-bg"></div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5 shadow-[0_0_30px_rgba(224,142,254,0.1)]">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">
+            The Explorer</div>
+<div class="flex items-center gap-4 text-neutral-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" style="">account_circle</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" style="">settings</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="px-8 pb-24 min-h-screen max-w-[1440px] mx-auto pt-[120px]">
+<!-- Back Navigation & Title -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+<div class="max-w-2xl">
+<button class="flex items-center gap-2 px-6 py-2 rounded-full bg-surface-container-high border border-outline-variant/20 text-sm font-medium hover:bg-surface-bright transition-all group mb-10" style="">
+<span class="material-symbols-outlined text-primary group-hover:-translate-x-1 transition-transform" style="">arrow_back</span>
+                Back to Orbit
+            </button>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface leading-none mb-4" style="">
+                我的<span class="text-primary-container" style="">快乐回忆</span>
+</h1>
+<p class="text-on-surface-variant text-base max-w-lg" style="">在我的星系世界里，沿着时间轴探索我的故事吧。这段致密的时光终将帮我拥有属于自己的引力和光。</p>
+</div>
+<div class="flex flex-col items-end">
+<div class="text-tertiary font-bold tracking-[0.2em] text-xs uppercase mb-2" style="">当前纪元</div>
+<div class="font-light text-on-surface text-3xl" style="">2026.04.15</div>
+</div>
+</div>
+<!-- Empty State Content Area -->
+<div class="flex-grow flex flex-col items-center justify-center py-20 text-center">
+<div class="max-w-2xl">
+<h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface leading-tight mb-6 text-3xl md:text-4xl" style="">
+                这个星球很<span class="text-primary/40" style="">安静。</span></h2>
+<p class="text-on-surface-variant text-base md:text-lg font-medium tracking-tight opacity-60" style="">
+                该关卡还没有故事内容
+            </p>
+<div class="mt-12">
+<button class="px-8 py-3 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold hover:bg-primary/20 transition-all" style="">继续探索我的世界
+                </button>
+</div>
+<div class="mt-12 w-24 h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent mx-auto"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 flex flex-col items-center justify-center border-t border-white/5 bg-black mt-auto">
+<div class="text-neutral-500 font-['Plus_Jakarta_Sans'] text-[10px] tracking-widest uppercase opacity-60" style="">
+        © 2026 THE CELESTIAL ARCHITECT.
+    </div>
+</footer>
+</body></html>

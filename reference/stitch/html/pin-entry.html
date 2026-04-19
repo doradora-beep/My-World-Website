@@ -1,0 +1,159 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aetheris | Enter Editing Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0e0e0e;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .soul-gradient {
+            background: linear-gradient(135deg, #e08efe 0%, #d180ef 100%);
+        }
+        .glass-pane {
+            background: rgba(25, 26, 26, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+        .nebula-orb {
+            filter: blur(80px);
+            opacity: 0.15;
+            position: absolute;
+            z-index: -1;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-dim": "#a9beab",
+                        "surface-dim": "#0e0e0e",
+                        "secondary-fixed": "#e0f7e2",
+                        "primary-container": "#e08efe",
+                        "surface-container": "#191a1a",
+                        "error-container": "#8a1632",
+                        "surface-bright": "#2c2c2c",
+                        "on-tertiary-container": "#00535e",
+                        "primary-fixed": "#eaa9ff",
+                        "surface-container-highest": "#262626",
+                        "inverse-on-surface": "#565555",
+                        "secondary-fixed-dim": "#d2e8d4",
+                        "on-tertiary-fixed": "#003e47",
+                        "on-secondary-fixed": "#394c3d",
+                        "surface-tint": "#e7a1ff",
+                        "on-error-container": "#ff97a3",
+                        "tertiary-container": "#7be7f9",
+                        "inverse-surface": "#fcf9f8",
+                        "tertiary-dim": "#6cd8eb",
+                        "tertiary-fixed-dim": "#6cd8eb",
+                        "secondary": "#b6ccb8",
+                        "on-secondary-fixed-variant": "#556959",
+                        "primary-fixed-dim": "#e395ff",
+                        "on-surface": "#e7e5e4",
+                        "surface-container-low": "#131313",
+                        "on-primary-fixed-variant": "#6c1e8b",
+                        "on-tertiary-fixed-variant": "#005d69",
+                        "surface-variant": "#262626",
+                        "inverse-primary": "#893da7",
+                        "tertiary-fixed": "#7be7f9",
+                        "on-background": "#e7e5e4",
+                        "surface": "#0e0e0e",
+                        "on-primary-fixed": "#45005f",
+                        "primary-dim": "#d180ef",
+                        "on-primary-container": "#4f006c",
+                        "error-dim": "#c8475d",
+                        "secondary-container": "#172a1c",
+                        "outline-variant": "#484848",
+                        "on-secondary-container": "#94a997",
+                        "primary": "#e7a1ff",
+                        "outline": "#767575",
+                        "on-primary": "#5d097d",
+                        "background": "#0e0e0e",
+                        "surface-container-high": "#202020",
+                        "on-tertiary": "#005c68",
+                        "on-error": "#490013",
+                        "on-surface-variant": "#acabaa",
+                        "on-secondary": "#324536",
+                        "surface-container-lowest": "#000000",
+                        "tertiary": "#a8f1ff",
+                        "error": "#fd6f85"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-hidden">
+<!-- Background Content (Blurred) -->
+<div class="fixed inset-0 z-0 blur-[30px] opacity-40 scale-105 select-none pointer-events-none">
+<!-- TopAppBar Placeholder (JSON Rule: TopNavBar) -->
+<header class="flex justify-between items-center px-8 py-4 w-full bg-neutral-950/40 border-b border-white/5">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">Aetheris</div>
+<div class="flex gap-8 text-sm font-medium text-neutral-400">
+<span class="" style="">Chronicles</span>
+<span class="" style="">Star-Maps</span>
+<span class="" style="">Nexus</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-neutral-400" style="">account_circle</span>
+<span class="material-symbols-outlined text-neutral-400" style="">settings</span>
+</div>
+</header>
+<!-- Mock Home Content -->
+<main class="p-20 grid grid-cols-12 gap-8">
+<div class="col-span-8">
+<h1 class="text-7xl font-extrabold tracking-tighter mb-6 text-on-surface" style="">Architect of the <span class="text-[#e08efe]" style="">Void</span>.</h1>
+<p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed" style="">Your story is not just written; it is architected across the celestial canvas. Every entry is a star, every memory a constellation.</p>
+</div>
+<div class="col-span-4 aspect-square bg-surface-container-high rounded-xl overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Abstract cinematic view of a swirling violet nebula with distant stars and crystalline structures refracting light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxMorzFnrSFdoEzmSHl7AzQWtIehwaaMgfkTU-o2Iok8tle8-n-gTl2X2ppRPqK9RR12eydR4pliUJBz-H5DYRUbHda0f0YSiAGb3lo4TqpJGOxSRQPHiGki8_tEowEGjkzBU8lINKEQ03qycEcHzGZcmVveLO636QLMrcqxTXIc5kKVREag-gMt77nsWj1uJuQrDPhl5Q_9jYNBrHBjPz7zPvrhQkjRkZTTQ7dFe6mq109onbGKoedXiBGHOwMviuoZITc5eYvAI" style="">
+</div>
+<div class="col-span-4 h-64 bg-surface-container-low rounded-xl"></div>
+<div class="col-span-8 h-64 bg-surface-container rounded-xl"></div>
+</main>
+</div>
+<!-- Modal Backdrop & Nebula Orbs -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-[30px]">
+<div class="nebula-orb w-[600px] h-[600px] bg-primary-container top-1/2 left-1/2 -translate-x-full -translate-y-full rounded-full"></div>
+<div class="nebula-orb w-[400px] h-[400px] bg-tertiary bottom-0 right-0 rounded-full"></div>
+<!-- PIN Entry Modal (The Frosted Pane) -->
+<div class="glass-pane w-full max-w-md mx-4 p-10 rounded-xl border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col items-center text-center relative overflow-hidden">
+<!-- Subtle internal glow -->
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-primary-container/10 blur-3xl rounded-full"></div>
+<!-- Icon -->
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-8 border border-outline-variant/20">
+<span class="material-symbols-outlined text-[#e08efe] text-3xl" style="">lock_open</span>
+</div>
+<!-- Title & Subtext -->
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface mb-2" style="">进入编辑模式</h2>
+<p class="text-on-surface-variant text-sm mb-12 tracking-wide" style="">请输入安全访问密码，以编辑我的世界。</p>
+<!-- PIN Input Field -->
+<div class="w-full mb-12 group">
+<input class="w-full bg-transparent border-0 border-b-2 border-outline-variant/30 text-center text-3xl tracking-[1.5em] font-light py-2 focus:ring-0 focus:border-transparent transition-all placeholder:text-surface-container-highest focus:placeholder-transparent outline-none" maxlength="4" onblur="this.style.borderImage='linear-gradient(to right, transparent, #484848, transparent) 1'; this.parentElement.classList.remove('drop-shadow-[0_4px_10px_rgba(224,142,254,0.1)]')" onfocus="this.style.borderImage='linear-gradient(to right, transparent, #e08efe, transparent) 1'; this.parentElement.classList.add('drop-shadow-[0_4px_10px_rgba(224,142,254,0.1)]')" placeholder="••••" style="border-image: linear-gradient(to right, transparent, #484848, transparent) 1;" type="password">
+</div>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-4 w-full">
+<button class="flex-1 py-4 px-8 rounded-full border border-outline-variant/20 bg-white/5 hover:bg-white/10 text-on-surface font-medium transition-all active:scale-95" style="">取消</button>
+<button class="flex-1 py-4 px-8 rounded-full soul-gradient text-black font-bold shadow-[0_0_20px_rgba(224,142,254,0.3)] hover:shadow-[0_0_30px_rgba(129,236,255,0.4)] hover:brightness-110 transition-all active:scale-95" style="">确认</button>
+</div>
+<!-- Minimal Helper -->
+</div>
+</div>
+<!-- Hidden Navigation Shell (Suppressed as per Task Logic for Transactional/Focused UI) -->
+<!-- The Sidebar and Bottom Bar are suppressed to prioritize the PIN Modal Focus -->
+</body></html>

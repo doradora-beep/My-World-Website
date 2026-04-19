@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed-variant": "#556959",
+            "inverse-surface": "#fcf9f8",
+            "on-primary": "#5d097d",
+            "on-primary-fixed": "#45005f",
+            "secondary-fixed": "#e0f7e2",
+            "on-surface-variant": "#acabaa",
+            "secondary-container": "#172a1c",
+            "on-surface": "#e7e5e4",
+            "inverse-primary": "#893da7",
+            "tertiary-fixed": "#7be7f9",
+            "tertiary-container": "#7be7f9",
+            "surface-bright": "#2c2c2c",
+            "on-secondary": "#324536",
+            "primary-container": "#e08efe",
+            "outline": "#767575",
+            "background": "#0e0e0e",
+            "on-background": "#e7e5e4",
+            "outline-variant": "#484848",
+            "on-tertiary-fixed-variant": "#005d69",
+            "primary-fixed": "#eaa9ff",
+            "on-tertiary-container": "#00535e",
+            "secondary-dim": "#a9beab",
+            "surface-container-low": "#131313",
+            "primary-dim": "#d180ef",
+            "surface-dim": "#0e0e0e",
+            "surface": "#0e0e0e",
+            "primary-fixed-dim": "#e395ff",
+            "primary": "#e7a1ff",
+            "on-secondary-fixed": "#394c3d",
+            "error-dim": "#c8475d",
+            "secondary-fixed-dim": "#d2e8d4",
+            "surface-tint": "#e7a1ff",
+            "surface-container-lowest": "#000000",
+            "on-secondary-container": "#94a997",
+            "secondary": "#b6ccb8",
+            "surface-container-highest": "#262626",
+            "error": "#fd6f85",
+            "on-tertiary-fixed": "#003e47",
+            "tertiary": "#a8f1ff",
+            "on-error-container": "#ff97a3",
+            "surface-container": "#191a1a",
+            "tertiary-fixed-dim": "#6cd8eb",
+            "inverse-on-surface": "#565555",
+            "error-container": "#8a1632",
+            "on-primary-container": "#4f006c",
+            "surface-variant": "#262626",
+            "surface-container-high": "#202020",
+            "on-error": "#490013",
+            "tertiary-dim": "#6cd8eb",
+            "on-tertiary": "#005c68"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Plus Jakarta Sans"],
+            "label": ["Plus Jakarta Sans"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nebula-bg {
+      background: radial-gradient(circle at 20% 30%, rgba(224, 142, 254, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(129, 236, 255, 0.1) 0%, transparent 40%);
+    }
+    .glass-panel {
+      background: rgba(25, 26, 26, 0.6);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+    }
+    .ghost-border {
+      border: 1.5px solid rgba(72, 72, 72, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared Component: TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5 shadow-[0_0_30px_rgba(224,142,254,0.1)]">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">Aetheris</div>
+<div class="hidden md:flex items-center gap-8 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-medium">
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">编年史</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">星图</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">核心枢纽</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)] transition-all duration-300 scale-95 active:scale-90" style="">
+          退出编辑模式
+        </button>
+<div class="flex items-center gap-2 text-fuchsia-300">
+<span class="material-symbols-outlined cursor-pointer hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)]" style="">account_circle</span>
+<span class="material-symbols-outlined cursor-pointer hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)]" style="">settings</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Background Level Page Content (Blurred/Simulated) -->
+<main class="min-h-screen pt-24 px-8 nebula-bg opacity-40 grayscale blur-md pointer-events-none">
+<div class="max-w-6xl mx-auto py-12">
+<div class="mb-12">
+<h1 class="text-6xl font-extrabold tracking-tighter mb-4" style="">编年史地平线</h1>
+<p class="text-on-surface-variant max-w-xl" style="">通过首席建筑师愿景的轨道扇区追踪天体谱系。</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="h-64 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-96 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-64 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-80 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-72 bg-surface-container-high rounded-lg ghost-border"></div>
+</div>
+</div>
+</main>
+<!-- Editor Overlay (The Main Task) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+<!-- Backdrop Blur for emphasis -->
+<div class="absolute inset-0 bg-surface-container-lowest/60 backdrop-blur-sm"></div>
+<div class="relative w-full max-w-5xl glass-panel rounded-xl ghost-border shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[921px]">
+<!-- Left Editorial Section: Context & Core -->
+<div class="w-full md:w-5/12 p-8 md:p-12 border-r border-outline-variant/10 overflow-y-auto">
+<div class="space-y-10">
+<header>
+<span class="uppercase tracking-[0.3em] text-tertiary font-bold mb-2 block text-xs" style="">故事架构师</span>
+<h2 class="font-extrabold tracking-tight leading-tight text-3xl bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-primary-dim" style="">编辑故事卡片</h2>
+</header>
+<div class="space-y-8">
+<!-- Topic Dropdown -->
+<div class="group">
+<label class="uppercase tracking-widest text-on-surface-variant font-bold mb-3 block text-xs" style="">卡片主题</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 rounded py-3.5 px-4 appearance-none text-on-surface focus:ring-0 focus:border-primary/50 transition-all cursor-pointer relative z-10 text-sm" style="background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23acabaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em;">
+<option>幽静星云</option>
+<option>虚空回响</option>
+<option>恒星起源</option>
+<option>轨道坍缩</option>
+</select>
+</div>
+</div>
+<!-- Title Input -->
+<div class="group">
+<label class="uppercase tracking-widest text-on-surface-variant font-bold mb-3 block text-xs" style="">故事标题</label>
+<input class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-primary/50 font-bold tracking-tight text-on-surface placeholder:text-surface-container-highest px-5 py-4 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(224,142,254,0.1)] rounded text-xl" placeholder="输入节点代号..." type="text" value="破碎的对齐"/>
+</div>
+<!-- Core Essence -->
+<div class="group">
+<label class="uppercase tracking-widest text-on-surface-variant font-bold mb-3 block text-xs" style="">故事精华</label>
+<textarea class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-tertiary/50 text-on-secondary-container italic py-4 px-5 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] resize-none rounded text-sm" placeholder="一句话描述这个故事..." rows="3"></textarea>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Editorial Section: Narrative & Media -->
+<div class="w-full md:w-7/12 p-8 md:p-12 bg-white/[0.02] flex flex-col overflow-y-auto">
+<div class="space-y-10 flex-grow">
+<!-- Backstory/Reflection Textarea -->
+<div class="group">
+<label class="uppercase tracking-widest text-on-surface-variant font-bold mb-3 block text-xs" style="">故事细节与感悟</label>
+<textarea class="w-full bg-surface-container-low/40 backdrop-blur-md rounded border border-outline-variant/10 px-5 py-4 text-on-surface-variant leading-relaxed focus:ring-0 focus:border-tertiary/50 outline-none transition-all resize-none placeholder:text-on-surface-variant/30 focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] text-sm" placeholder="描述故事有趣的细节和个人反思..." rows="6"></textarea>
+</div>
+<!-- Media Section -->
+<div>
+<div class="flex items-center justify-between mb-6">
+<label class="uppercase tracking-widest text-on-surface-variant font-bold text-xs" style="">媒体上传</label>
+<div class="flex bg-surface-container-high p-1 rounded-full ghost-border">
+<button class="px-4 py-1.5 rounded-full font-black uppercase tracking-widest bg-gradient-to-br from-primary-container to-primary-dim text-on-primary shadow-lg text-xs" style="">图片</button>
+<button class="px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-on-surface-variant hover:text-on-surface transition-colors text-xs" style="">视频</button>
+</div>
+</div>
+<!-- Image Grid (3 slots) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+<!-- Slot 1: Uploaded Preview (Main Fragment) -->
+<div class="group relative rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/20 hover:border-primary-container/50 transition-all shadow-xl aspect-[4/4.5]">
+<img class="w-full h-full object-cover" data-alt="Close-up of a crystalline structure with neon purple veins glowing in the dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOMxu1PZWU_R1pKoSMYd6GatP0xWGqXrQVlvHikwoud8PmDfZgj9ya83qYQ37HySpaEhPl1g1bc9UJ33r1Ge8BkQht19s3t3C8AMvRtV3i9V1o8r_qPF_DEBSZE-JBsOob6rOhi384k4Xq24jK_E9CX80ZVJSgndnWfqqXnZdD5X1ViM2epKvpAyCqcn_lV-yCgR2P5Q5ccHq56-z5_juoCl4auF-ocL2S66gFzstCdLCZH6tuveeKgl_WNTAjFXGBymACLDHo9A0" style=""/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-center">
+<span class="font-bold text-primary-container uppercase tracking-widest"><br/></span>
+<button class="material-symbols-outlined text-error-dim hover:text-error" style="">delete</button>
+</div>
+</div>
+<div class="absolute top-3 right-3 bg-primary-container/90 text-on-primary-container rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-sm" style='font-variation-settings: "FILL" 1;'>check_circle</span>
+</div>
+</div>
+<!-- Slot 2: Currently Uploading -->
+<div class="relative rounded-xl overflow-hidden bg-surface-container-high border border-primary-container/30 flex flex-col items-center justify-center p-6 text-center aspect-[4/4.5]">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<img class="w-full h-full object-cover blur-md grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDO7ve--BqBA3py9EGywThawQE9kfWGV3FSg40tmmEKJexKRTlhrdm84NWSVemmC67Odc7eRh1QX5KEF4YBMTGM3fZc2hgSMAetGfvyU9fKZ8T6OX_knlsyHYfY2dAG_4fOcF-Lmd4_FOUSVqsAfiztUvRyGHODeybR2Fcl3OcugNptzhKX214L4pv2gGJNR9ZUac3i1Ixce_8XHP84zYrRJp_rfZfTeFxyvNsP5maiS3ltWFMB0ItqMK_0rUa1ddnFujsNaB6p9E" style=""/>
+</div>
+<div class="z-10 w-full flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center mb-4 animate-pulse">
+<span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>cloud_upload</span>
+</div>
+<p class="uppercase tracking-widest font-bold text-primary mb-1 text-xs" style="">正在上传</p>
+<p class="text-on-surface-variant mb-6 text-[11px]" style="">fragment_02_nebula.jpg</p>
+<!-- Glowing Progress Bar -->
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden shadow-inner">
+<div class="h-full w-[65%] bg-gradient-to-r from-primary-container to-tertiary shadow-[0_0_10px_rgba(224,142,254,0.6)]"></div>
+</div>
+<p class="font-bold text-on-surface-variant mt-2 text-[11px]" style="">65%</p>
+</div>
+</div>
+<!-- Slot 3: Empty Slot -->
+<button class="group rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-tertiary/50 hover:bg-tertiary/5 transition-all flex flex-col items-center justify-center p-6 aspect-[4/4.5] gap-3" style="">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-outline group-hover:text-tertiary text-2xl" style="">add</span>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-neutral-500 uppercase font-medium text-[10px] tracking-[0.15em] opacity-80" style="">最大限制 24MB</p>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Sticky Footer for Buttons -->
+<div class="pt-12 mt-auto flex items-center justify-end gap-6 border-t border-outline-variant/10">
+<button class="font-black uppercase tracking-widest text-on-surface-variant hover:text-error transition-colors text-sm" style="">
+            取消
+          </button>
+<button class="bg-gradient-to-br from-primary-container to-primary-dim text-on-primary px-8 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(224,142,254,0.3)] hover:shadow-[0_0_30px_rgba(129,236,255,0.4)] transition-all transform active:scale-95 text-sm" style="">保存故事</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Shared Component: Footer -->
+<footer class="w-full py-12 flex flex-col items-center justify-center gap-6 border-t border-white/5 bg-black opacity-20 pointer-events-none mt-auto">
+<div class="flex gap-8 font-['Plus_Jakarta_Sans'] tracking-widest uppercase text-neutral-600">
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">隐私政策</a>
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">虚空条款</a>
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">联系我们</a>
+</div>
+<div class="text-neutral-500 font-['Plus_Jakarta_Sans'] tracking-widest uppercase" style="">
+      © 2024 The Celestial Architect. 保留所有权利。
+    </div>
+</footer>
+</body></html>

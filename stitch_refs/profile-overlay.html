@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-dim": "#a9beab",
+                    "surface-dim": "#0e0e0e",
+                    "secondary-fixed": "#e0f7e2",
+                    "primary-container": "#e08efe",
+                    "surface-container": "#191a1a",
+                    "error-container": "#8a1632",
+                    "surface-bright": "#2c2c2c",
+                    "on-tertiary-container": "#00535e",
+                    "primary-fixed": "#eaa9ff",
+                    "surface-container-highest": "#262626",
+                    "inverse-on-surface": "#565555",
+                    "secondary-fixed-dim": "#d2e8d4",
+                    "on-tertiary-fixed": "#003e47",
+                    "on-secondary-fixed": "#394c3d",
+                    "surface-tint": "#e7a1ff",
+                    "on-error-container": "#ff97a3",
+                    "tertiary-container": "#7be7f9",
+                    "inverse-surface": "#fcf9f8",
+                    "tertiary-dim": "#6cd8eb",
+                    "tertiary-fixed-dim": "#6cd8eb",
+                    "secondary": "#b6ccb8",
+                    "on-secondary-fixed-variant": "#556959",
+                    "primary-fixed-dim": "#e395ff",
+                    "on-surface": "#e7e5e4",
+                    "surface-container-low": "#131313",
+                    "on-primary-fixed-variant": "#6c1e8b",
+                    "on-tertiary-fixed-variant": "#005d69",
+                    "surface-variant": "#262626",
+                    "inverse-primary": "#893da7",
+                    "tertiary-fixed": "#7be7f9",
+                    "on-background": "#e7e5e4",
+                    "surface": "#0e0e0e",
+                    "on-primary-fixed": "#45005f",
+                    "primary-dim": "#d180ef",
+                    "on-primary-container": "#4f006c",
+                    "error-dim": "#c8475d",
+                    "secondary-container": "#172a1c",
+                    "outline-variant": "#484848",
+                    "on-secondary-container": "#94a997",
+                    "primary": "#e7a1ff",
+                    "outline": "#767575",
+                    "on-primary": "#5d097d",
+                    "background": "#0e0e0e",
+                    "surface-container-high": "#202020",
+                    "on-tertiary": "#005c68",
+                    "on-error": "#490013",
+                    "on-surface-variant": "#acabaa",
+                    "on-secondary": "#324536",
+                    "surface-container-lowest": "#000000",
+                    "tertiary": "#a8f1ff",
+                    "error": "#fd6f85"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans", "Noto Sans SC"],
+                    "body": ["Plus Jakarta Sans", "Noto Sans SC"],
+                    "label": ["Plus Jakarta Sans", "Noto Sans SC"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif; }
+        .nebula-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(224, 142, 254, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(129, 236, 255, 0.15) 0%, transparent 40%);
+        }
+        .glass-panel {
+            background: rgba(25, 26, 26, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+    
+        @keyframes neon-pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1.1); filter: blur(25px); }
+            50% { opacity: 0.8; transform: scale(1.25); filter: blur(45px); }
+        }
+        .animate-neon-pulse {
+            animation: neon-pulse 5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container min-h-screen overflow-hidden">
+<!-- Background Nebula and Foundation -->
+<div class="fixed inset-0 nebula-bg -z-10 bg-surface-container-lowest"></div>
+<!-- Profile Overlay Container -->
+<div class="relative flex justify-center min-h-screen w-full px-6 py-4 items-start pt-20">
+<!-- Background decorative element: Orbital glow -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-container/10 rounded-full blur-[100px] pointer-events-none"></div>
+<!-- Glassmorphic Card - Adjusted overall height with py-8 instead of py-12 -->
+<div class="glass-panel relative w-full max-w-lg rounded-xl border border-white/5 shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col items-center px-6 py-8 text-center">
+<!-- Close Button -->
+<button class="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-on-surface-variant transition-all duration-300 active:scale-90 group aspect-square flex items-center justify-center w-10 h-10">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<!-- Avatar - Consistent -->
+<div class="relative mb-6 group">
+<!-- Outer Glow -->
+<div class="absolute inset-0 bg-primary-container/40 rounded-full blur-2xl scale-110 group-hover:bg-tertiary/60 transition-all duration-700 animate-neon-pulse"></div>
+<!-- Avatar Frame -->
+<div class="relative w-32 h-32 rounded-full border-2 border-white/10 p-2 bg-surface-container-high/40 backdrop-blur-md">
+<img alt="Dora The Explorer Profile" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQZLXe3XgTW1cp19U9-UPkzOofIdjBrAY_khKAX64xotbphcYmSvOVs4-gqm8clWHuL2zGSjPrb6-qD20Bnde0BGbIDXnGVGqzE1uzwg_ZjUioNnptWS4lsm7s8E4RdNlqA6tAJm4mxMoR_Mb1VFVeq3K8Z04JanVKM1p1BnN-A5Jb_qQdfbwcud03g-a-3INCFCDSbXoB--dK1V3gXW7mJhEfx8uOVisU1EXDmd4HaXeJ8fkCWtdBo0Dwp-_OQ4FtDl5r_iYHBao"/>
+</div>
+<!-- Status Badge -->
+<div class="absolute bottom-2.5 right-2.5 w-4.5 h-4.5 bg-[#81ecff] rounded-full border-[3px] border-surface shadow-[0_0_12px_rgba(129,236,255,0.8)]"></div>
+</div>
+<!-- Profile Info -->
+<div class="space-y-4">
+<div>
+<span class="text-tertiary font-label text-[10px] uppercase tracking-[0.3em] mb-1 block">THE STAR TRAVELLER</span>
+<h1 class="font-bold tracking-tighter text-on-surface mb-2 text-2xl md:text-3xl">
+                    Dora <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-tertiary">The Explorer</span>
+</h1>
+</div>
+<!-- Bio - Font size reduced from text-base/lg to text-sm/base -->
+<p class="text-sm md:text-base text-on-surface-variant leading-relaxed max-w-sm mx-auto font-light tracking-wide italic px-4 text-xs md:text-sm">
+                “在这个星系里，总会有更大的恒星试图用引力扭曲你的轨道。但别忘了，哪怕是一颗中子星，密度大得惊人，也只需默默旋转，就能让光为之弯曲。不必活成别人的太阳，你只需凝聚自己的内核。 当你足够专注，你的热爱会自然吸引同频的卫星。”
+            </p>
+<!-- Stats / Bento Lite - Compressed height (py-2 instead of py-3) -->
+<div class="grid grid-cols-3 gap-3 pt-4 w-full max-w-sm mx-auto">
+<div class="bg-white/5 rounded-lg py-2 px-1 border border-white/5">
+<div class="text-primary text-lg font-bold">6</div>
+<div class="text-on-surface-variant text-[9px] uppercase tracking-widest mt-0.5">星图</div>
+</div>
+<div class="bg-white/5 rounded-lg py-2 px-1 border border-white/5">
+<div class="text-tertiary text-lg font-bold">48</div>
+<div class="text-on-surface-variant text-[9px] uppercase tracking-widest mt-0.5">故事</div>
+</div>
+<div class="bg-white/5 rounded-lg py-2 px-1 border border-white/5">
+<div class="text-on-surface text-lg font-bold">1.2k</div>
+<div class="text-on-surface-variant text-[9px] uppercase tracking-widest mt-0.5">访问</div>
+</div>
+</div>
+<!-- Primary Action - Consistent buttons -->
+<div class="pt-6 flex flex-col sm:flex-row gap-3 justify-center w-full">
+<button class="bg-gradient-to-br from-primary-container to-primary-dim text-on-primary-container px-8 py-3 rounded-full font-bold text-xs tracking-widest uppercase shadow-[0_0_15px_rgba(224,142,254,0.3)] hover:shadow-[0_0_25px_rgba(129,236,255,0.4)] transition-all duration-300 active:scale-95">
+                    追随航程
+                </button>
+<button class="bg-surface-container-highest/60 border border-white/10 text-on-surface px-8 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-white/10 transition-all duration-300 active:scale-95">
+                    星枢传讯
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Decoration: Floating Orbs -->
+<div class="fixed top-20 right-[-100px] w-56 h-56 bg-tertiary/5 rounded-full blur-[80px] -z-10"></div>
+<div class="fixed bottom-10 left-[-100px] w-72 h-72 bg-primary/5 rounded-full blur-[100px] -z-10"></div>
+</body></html>

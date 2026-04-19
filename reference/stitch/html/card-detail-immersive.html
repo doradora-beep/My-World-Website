@@ -1,0 +1,193 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>编年史详情 - 建筑师</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#556959",
+                        "tertiary": "#a8f1ff",
+                        "on-error-container": "#ff97a3",
+                        "inverse-surface": "#fcf9f8",
+                        "primary-fixed": "#eaa9ff",
+                        "tertiary-fixed-dim": "#6cd8eb",
+                        "secondary": "#b6ccb8",
+                        "secondary-container": "#172a1c",
+                        "surface-bright": "#2c2c2c",
+                        "surface-tint": "#e7a1ff",
+                        "primary": "#e7a1ff",
+                        "surface-container": "#191a1a",
+                        "outline-variant": "#484848",
+                        "surface-container-high": "#202020",
+                        "secondary-dim": "#a9beab",
+                        "on-secondary-container": "#94a997",
+                        "background": "#0e0e0e",
+                        "error": "#fd6f85",
+                        "secondary-fixed-dim": "#d2e8d4",
+                        "on-tertiary-fixed": "#003e47",
+                        "on-primary-container": "#4f006c",
+                        "on-primary": "#5d097d",
+                        "on-error": "#490013",
+                        "primary-dim": "#d180ef",
+                        "on-secondary-fixed": "#394c3d",
+                        "on-background": "#e7e5e4",
+                        "inverse-on-surface": "#565555",
+                        "on-tertiary": "#005c68",
+                        "primary-container": "#e08efe",
+                        "outline": "#767575",
+                        "error-dim": "#c8475d",
+                        "tertiary-fixed": "#7be7f9",
+                        "secondary-fixed": "#e0f7e2",
+                        "surface-container-lowest": "#000000",
+                        "primary-fixed-dim": "#e395ff",
+                        "on-surface": "#e7e5e4",
+                        "on-primary-fixed-variant": "#6c1e8b",
+                        "surface-container-low": "#131313",
+                        "on-tertiary-fixed-variant": "#005d69",
+                        "on-tertiary-container": "#00535e",
+                        "on-secondary": "#324536",
+                        "on-primary-fixed": "#45005f",
+                        "surface-container-highest": "#262626",
+                        "tertiary-container": "#7be7f9",
+                        "on-surface-variant": "#acabaa",
+                        "surface": "#0e0e0e",
+                        "surface-dim": "#0e0e0e",
+                        "inverse-primary": "#893da7",
+                        "tertiary-dim": "#6cd8eb",
+                        "surface-variant": "#262626",
+                        "error-container": "#8a1632"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+                        "label": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(14, 14, 14, 0.45);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+        .ghost-border {
+            border: 1px solid rgba(224, 142, 254, 0.12);
+            box-shadow: inset 0 0 20px rgba(224, 142, 254, 0.05);
+        }
+        .nebula-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(224, 142, 254, 0.1), transparent 70%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            overflow: hidden;
+            background-color: #0e0e0e;
+        }
+        /* Custom scrollbar for better fit inside the panel */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(224, 142, 254, 0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(224, 142, 254, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary/30 selection:text-primary min-h-screen flex items-center justify-center p-6 md:p-12">
+<!-- Background Level Timeline (Integrated & Blurred) -->
+<div class="fixed inset-0 -z-10 bg-surface-container-lowest overflow-hidden blur-[100px] opacity-30 scale-105 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-container/20 rounded-full mix-blend-screen filter blur-[150px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-tertiary-container/20 rounded-full mix-blend-screen filter blur-[150px]"></div>
+<div class="flex flex-col items-center justify-center h-full space-y-32">
+<div class="w-[90%] h-px bg-outline-variant/20 relative">
+<div class="absolute -top-4 left-[20%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20"></div>
+<div class="absolute -top-6 left-[50%] w-16 h-16 rounded-full bg-tertiary/10 border border-tertiary/20"></div>
+<div class="absolute -top-4 left-[80%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20"></div>
+</div>
+</div>
+</div>
+<!-- Main Detail Overlay Container - Refined Dimensions -->
+<main class="relative w-full max-w-4xl max-h-[85vh] overflow-hidden glass-panel ghost-border rounded-lg shadow-[0px_40px_100px_rgba(0,0,0,0.6),0px_0px_60px_rgba(224,142,254,0.08)] flex flex-col">
+<!-- Top Controls -->
+<div class="absolute top-4 right-4 z-50">
+<button class="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-on-surface-variant hover:text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all duration-300" style="">
+<span class="material-symbols-outlined text-lg" style="">close</span>
+</button>
+</div>
+<!-- Content Shell - Fits Entirely within Viewport -->
+<div class="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12 h-full overflow-hidden">
+<!-- Media Column - Immersive focal point -->
+<div class="flex-shrink-0 w-full lg:w-[45%] h-64 lg:h-auto">
+<div class="relative w-full h-full group">
+<!-- Decorative Orbs -->
+<div class="absolute -top-12 -left-12 w-48 h-48 nebula-glow opacity-50"></div>
+<div class="absolute -bottom-12 -right-12 w-48 h-48 nebula-glow opacity-30"></div>
+<!-- Main Cinematic Image - Increased scale for immersion -->
+<div class="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl">
+<img alt="宇宙星云" class="w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa6SwQpxUrSMeAnvqKMqZD7jMYpug12Nr2oggTQWSultL2IZfv9yX3qj4kK2oXvddPNgONpnt1VOUIN5PLM3ZcI0ESAVr30PzwdBAazQs5NBLClxMpJW_czkDKMnFEkJBrJzR_jiDiD6U3wnD34dcuzMgD8KQTcOLhwZvZHF9QIg8VcrA6dALghmHD4bwKBtOUib4Qu5di-slVDIzflWFBzO64qljBct_ARAuIbiswA1zOQfm2MhbKOnCMCdETuOr5seIdfhp2AR8" style="">
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+</div>
+</div>
+<!-- Text Content Column - Optimized Hierarchy -->
+<div class="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-2">
+<!-- Meta Info -->
+<div class="flex items-center gap-4 mb-4">
+<span class="text-[10px] font-bold tracking-[0.3em] uppercase text-primary-dim bg-primary/10 px-3 py-1 rounded-full border border-primary/20" style="">陪伴时光</span>
+<span class="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/60" style="">2024.11.08</span>
+</div>
+<!-- Header - Refined Size -->
+<h1 class="text-3xl md:text-4xl font-black tracking-tight text-white mb-6 leading-tight" style="">
+                    破碎的对齐
+                </h1>
+<!-- Core Essence -->
+<div class="pl-4 border-l border-primary-dim/30 mb-8">
+<p class="text-lg font-light text-on-surface-variant italic leading-relaxed" style="">
+                        “虚空中的共鸣并非源于声音，而是源于我们誓言维护的平衡织锦上的一道裂痕。”
+                    </p>
+</div>
+<!-- Backstory & Reflection Section -->
+<section class="space-y-4">
+<h3 class="text-[10px] font-bold tracking-[0.3em] uppercase text-primary/80 flex items-center gap-3" style="">
+<span class="w-1 h-1 rounded-full bg-primary/60"></span>背后的故事</h3>
+<!-- Refined body text size -->
+<div class="space-y-4 text-on-surface-variant/90 leading-[1.7] font-normal text-sm md:text-base">
+<p class="" style="">
+                            作为这些天体序列的建筑师，我观察到了档案中的首次偏差。对齐核心本应是静态完美的象征，却开始以一种违背既定宇宙法则的频率振动。这不是错误，而是一种进化。
+                        </p>
+<p class="" style="">
+                            第一次循环的记忆涌上心头——那是“大缝合”之前寒冷而永恒的沉寂。这道裂痕提醒着我们，即使在精心构建的现实中，灵魂本质的混沌也必须寻找呼吸的方式。
+                        </p>
+<p class="" style="">
+                            破碎的对齐并非设计的失败，而是新模式的起点。在这个模式中，虚空的伤痕被整合进地平线的辉煌之中。
+                        </p>
+</div>
+</section>
+</div>
+</div>
+<!-- Visual Accent Orbs -->
+<div class="absolute -bottom-40 -left-40 w-96 h-96 bg-primary-container/5 rounded-full blur-[120px] pointer-events-none"></div>
+</main>
+</body></html>

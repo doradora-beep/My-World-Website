@@ -1,0 +1,263 @@
+<!DOCTYPE html><html class="dark"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed-variant": "#556959",
+            "inverse-surface": "#fcf9f8",
+            "on-primary": "#5d097d",
+            "on-primary-fixed": "#45005f",
+            "secondary-fixed": "#e0f7e2",
+            "on-surface-variant": "#acabaa",
+            "secondary-container": "#172a1c",
+            "on-surface": "#e7e5e4",
+            "inverse-primary": "#893da7",
+            "tertiary-fixed": "#7be7f9",
+            "tertiary-container": "#7be7f9",
+            "surface-bright": "#2c2c2c",
+            "on-secondary": "#324536",
+            "primary-container": "#e08efe",
+            "outline": "#767575",
+            "background": "#0e0e0e",
+            "on-background": "#e7e5e4",
+            "outline-variant": "#484848",
+            "on-tertiary-fixed-variant": "#005d69",
+            "primary-fixed": "#eaa9ff",
+            "on-tertiary-container": "#00535e",
+            "secondary-dim": "#a9beab",
+            "surface-container-low": "#131313",
+            "primary-dim": "#d180ef",
+            "surface-dim": "#0e0e0e",
+            "surface": "#0e0e0e",
+            "primary-fixed-dim": "#e395ff",
+            "primary": "#e7a1ff",
+            "on-secondary-fixed": "#394c3d",
+            "error-dim": "#c8475d",
+            "secondary-fixed-dim": "#d2e8d4",
+            "surface-tint": "#e7a1ff",
+            "surface-container-lowest": "#000000",
+            "on-secondary-container": "#94a997",
+            "secondary": "#b6ccb8",
+            "surface-container-highest": "#262626",
+            "error": "#fd6f85",
+            "on-tertiary-fixed": "#003e47",
+            "tertiary": "#a8f1ff",
+            "on-error-container": "#ff97a3",
+            "surface-container": "#191a1a",
+            "tertiary-fixed-dim": "#6cd8eb",
+            "inverse-on-surface": "#565555",
+            "error-container": "#8a1632",
+            "on-primary-container": "#4f006c",
+            "surface-variant": "#262626",
+            "surface-container-high": "#202020",
+            "on-error": "#490013",
+            "tertiary-dim": "#6cd8eb",
+            "on-tertiary": "#005c68"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "body": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            "label": ["Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nebula-bg {
+      background: radial-gradient(circle at 20% 30%, rgba(224, 142, 254, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(129, 236, 255, 0.1) 0%, transparent 40%);
+    }
+    .glass-panel {
+      background: rgba(25, 26, 26, 0.6);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+    }
+    .ghost-border {
+      border: 1.5px solid rgba(72, 72, 72, 0.2);
+    }
+    .progress-glow {
+      box-shadow: 0 0 15px rgba(129, 236, 255, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared Component: TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5 shadow-[0_0_30px_rgba(224,142,254,0.1)]">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">Aetheris</div>
+<div class="hidden md:flex items-center gap-8 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-medium">
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">Chronicles</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">Star-Maps</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#" style="">Nexus</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)] transition-all duration-300 scale-95 active:scale-90" style="">
+        Exit Edit Mode
+      </button>
+<div class="flex gap-2 items-center">
+<button class="w-8 h-8 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-error cursor-pointer transition-all hover:scale-110" style="">
+<span class="material-symbols-outlined text-lg" style="">delete</span>
+</button>
+<button class="w-8 h-8 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-tertiary cursor-pointer transition-all hover:scale-110" style="">
+<span class="material-symbols-outlined text-lg" style="">fullscreen</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Background Level Page Content -->
+<main class="min-h-screen pt-24 px-8 nebula-bg opacity-40 grayscale blur-md pointer-events-none">
+<div class="max-w-6xl mx-auto py-12">
+<div class="mb-12">
+<h1 class="text-6xl font-extrabold tracking-tighter mb-4" style="">Chronicle Horizon</h1>
+<p class="text-on-surface-variant max-w-xl" style="">Tracing the celestial lineage through the orbital sectors of the prime architect's vision.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="h-64 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-96 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-64 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-80 bg-surface-container-high rounded-lg ghost-border"></div>
+<div class="h-72 bg-surface-container-high rounded-lg ghost-border"></div>
+</div>
+</div>
+</main>
+<!-- Editor Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+<div class="absolute inset-0 bg-surface-container-lowest/60 backdrop-blur-sm"></div>
+<div class="relative w-full max-w-5xl glass-panel rounded-xl ghost-border shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[95vh]">
+<!-- Left Editorial Section -->
+<div class="w-full md:w-5/12 p-8 md:p-12 border-r border-outline-variant/10 overflow-y-auto">
+<div class="space-y-10">
+<header>
+<span class="text-xs uppercase tracking-[0.3em] text-tertiary font-bold mb-2 block" style="">故事架构师</span>
+<h2 class="text-3xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-primary-dim" style="">编辑故事卡片</h2>
+</header>
+<div class="space-y-8">
+<div class="group">
+<label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block" style="">卡片主题</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 rounded py-3.5 px-4 appearance-none text-on-surface focus:ring-0 focus:border-primary/50 transition-all cursor-pointer relative z-10 text-sm" style="background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23acabaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em;">
+<option>幽静星云</option>
+<option>虚空回响</option>
+<option>恒星起源</option>
+<option>轨道坍缩</option>
+</select>
+</div>
+</div>
+<div class="group">
+<label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block" style="">故事标题</label>
+<input class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-primary/50 text-xl font-bold tracking-tight text-on-surface placeholder:text-surface-container-highest px-5 py-4 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(224,142,254,0.1)] rounded" placeholder="输入节点名称..." type="text" value="破碎的对齐">
+</div>
+<div class="group">
+<label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block" style="">故事精华</label>
+<textarea class="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-tertiary/50 text-on-secondary-container italic py-4 px-5 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] resize-none rounded text-sm" placeholder="一句话描述这个故事..." rows="3"></textarea>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Editorial Section -->
+<div class="w-full md:w-7/12 p-8 md:p-12 bg-white/[0.02] flex flex-col overflow-y-auto">
+<div class="space-y-10 flex-grow">
+<div class="group">
+<label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block" style="">故事细节与感悟</label>
+<textarea class="w-full bg-surface-container-low/40 backdrop-blur-md rounded border border-outline-variant/10 px-5 py-4 text-on-surface-variant leading-relaxed focus:ring-0 focus:border-tertiary/50 outline-none transition-all resize-none placeholder:text-on-surface-variant/30 focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] text-sm" placeholder="描述故事有趣的细节和个人反思..." rows="4"></textarea>
+</div>
+<div>
+<div class="flex items-center justify-between mb-6">
+<label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold" style="">媒体上传</label>
+<div class="flex bg-surface-container-high p-1 rounded-full ghost-border">
+<button class="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-on-surface-variant hover:text-on-surface transition-colors" style="">图片</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-br from-primary-container to-primary-dim text-on-primary shadow-lg" style="">视频</button>
+</div>
+</div>
+<div class="space-y-6">
+<!-- Polished Cinematic Video Card Area -->
+<div class="relative aspect-video overflow-hidden group border bg-black border-white/10">
+<!-- Video Preview Image -->
+<img class="h-full w-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOenqaiq5YF6bbAYXe85Z8_gwGP0uX0VJJR3J44GhFrGD6C5E5MHQWF6B1E7MnSbwZj5tnMLKD0JbB9dS81CIQcPjVYl5Ahkl1rpVFDBgexSuhPu8LftouPCE-f3Qc59O0J35sdGZkp9tmgw9gkkqRZ_DmkTK8qdFn3qx3LvZZNqcQGhhlq3cvtRXwVhCP5LhkSPRMVwP72RHwxuxBUs_oHZJQnfonM04Be9K0qI4gwWAFnuP1C8vri9GwvUgVE3tg3Y6zhgUbGxA" style="">
+<!-- Processing Overlay -->
+<div class="absolute inset-0 flex flex-col items-center justify-center bg-surface/40 backdrop-blur-sm">
+<div class="relative mb-4 w-16 h-16">
+<div class="absolute inset-0 rounded-full border-2 border-tertiary/20 border-t-tertiary animate-[spin_3s_linear_infinite]"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl text-tertiary" style="font-variation-settings: &quot;FILL&quot; 1;">videocam</span>
+</div>
+</div>
+<h3 class="text-xl font-headline font-bold text-white tracking-tight" style=""><span class="text-sm font-medium tracking-wider text-white/90" style="">已完成 74% ...</span></h3>
+<p class="text-[11px] text-on-surface-variant max-w-[280px] text-center mt-2 leading-relaxed" style="">正在上传视频，素材处理中</p>
+</div>
+<!-- Metadata & Controls -->
+<div class="absolute bottom-6 left-6 right-6 flex items-end justify-between z-20">
+<div class="flex flex-col">
+<div class="flex items-center gap-3">
+<span class="bg-primary-container/20 text-primary-container text-[9px] px-2 py-0.5 rounded-full border border-primary-container/30 font-bold tracking-widest uppercase" style="">实时预览</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-neutral-400" style="">schedule</span>
+<span class="text-[10px] text-neutral-400 font-bold tracking-tighter uppercase align-baseline" style="">0:24</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="w-7 h-7 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-error cursor-pointer transition-all hover:scale-110" style="">
+<span class="material-symbols-outlined text-sm" style="">delete</span>
+</button>
+<button class="w-7 h-7 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-tertiary cursor-pointer transition-all hover:scale-110" style="">
+<span class="material-symbols-outlined text-sm" style="">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Progress Scrubber -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-20 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-tertiary w-3/4 shadow-[0_0_10px_#81ecff]"></div>
+</div>
+</div>
+<!-- Source URL Input Field -->
+<div class="group mt-6 flex items-center relative">
+<div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-xl text-tertiary/70" style="">link</span>
+</div>
+<input class="w-full rounded-full border bg-surface-container-low/40 backdrop-blur-md py-4 pl-14 pr-12 text-sm italic text-on-surface placeholder:text-outline-variant/40 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_25px_rgba(129,236,255,0.1)] transition-all outline-none font-mono border-outline-variant/40 border-2" placeholder="资源链接..." type="text" value="https://nexus.aetheris.io/v/shattered-alignment-v1.mp4">
+<button class="absolute right-4 text-neutral-500 hover:text-primary transition-colors flex items-center justify-center p-1" style="">
+<span class="material-symbols-outlined text-xl" style="">check</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Footer -->
+<div class="pt-12 mt-auto flex items-center justify-end gap-6 border-t border-outline-variant/10">
+<button class="font-black uppercase tracking-widest text-on-surface-variant hover:text-error transition-colors text-sm" style="">取消</button>
+<button class="bg-gradient-to-br from-primary-container to-primary-dim text-on-primary px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(224,142,254,0.3)] hover:shadow-[0_0_30px_rgba(129,236,255,0.4)] transition-all transform active:scale-95 text-xs" style="">保存故事</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full py-12 flex flex-col items-center justify-center gap-6 border-t border-white/5 bg-black opacity-20 pointer-events-none mt-auto">
+<div class="flex gap-8 font-['Plus_Jakarta_Sans'] text-[10px] tracking-widest uppercase text-neutral-600">
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">Privacy Policy</a>
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">Terms of Void</a>
+<a class="hover:text-[#81ecff] transition-colors" href="#" style="">Contact</a>
+</div>
+<div class="text-neutral-500 font-['Plus_Jakarta_Sans'] text-[10px] tracking-widest uppercase" style="">
+    © 2024 The Celestial Architect. All rights reserved.
+  </div>
+</footer>
+</body></html>

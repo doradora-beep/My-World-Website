@@ -1,0 +1,171 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>编辑个人资料 | Aetheris</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#b6ccb8",
+                        "surface-variant": "#262626",
+                        "error": "#fd6f85",
+                        "on-tertiary": "#005c68",
+                        "on-primary": "#5d097d",
+                        "secondary-fixed-dim": "#d2e8d4",
+                        "outline-variant": "#484848",
+                        "surface-tint": "#e7a1ff",
+                        "on-error": "#490013",
+                        "on-background": "#e7e5e4",
+                        "inverse-surface": "#fcf9f8",
+                        "tertiary-container": "#7be7f9",
+                        "on-primary-fixed": "#45005f",
+                        "surface-container-highest": "#262626",
+                        "primary": "#e7a1ff",
+                        "primary-fixed": "#eaa9ff",
+                        "secondary-container": "#172a1c",
+                        "on-surface-variant": "#acabaa",
+                        "error-container": "#8a1632",
+                        "outline": "#767575",
+                        "on-tertiary-fixed-variant": "#005d69",
+                        "surface-bright": "#2c2c2c",
+                        "on-secondary-container": "#94a997",
+                        "surface-container": "#191a1a",
+                        "tertiary-fixed-dim": "#6cd8eb",
+                        "on-tertiary-fixed": "#003e47",
+                        "surface-container-high": "#202020",
+                        "on-primary-fixed-variant": "#6c1e8b",
+                        "background": "#0e0e0e",
+                        "on-secondary": "#324536",
+                        "on-error-container": "#ff97a3",
+                        "secondary-dim": "#a9beab",
+                        "primary-container": "#e08efe",
+                        "on-tertiary-container": "#00535e",
+                        "surface-container-low": "#131313",
+                        "tertiary-dim": "#6cd8eb",
+                        "inverse-on-surface": "#565555",
+                        "primary-dim": "#d180ef",
+                        "primary-fixed-dim": "#e395ff",
+                        "on-primary-container": "#4f006c",
+                        "tertiary": "#a8f1ff",
+                        "secondary-fixed": "#e0f7e2",
+                        "on-surface": "#e7e5e4",
+                        "surface-dim": "#0e0e0e",
+                        "surface": "#0e0e0e",
+                        "tertiary-fixed": "#7be7f9",
+                        "inverse-primary": "#893da7",
+                        "on-secondary-fixed-variant": "#556959",
+                        "on-secondary-fixed": "#394c3d",
+                        "error-dim": "#c8475d",
+                        "surface-container-lowest": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0e;
+            color: #e7e5e4;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nebula-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
+        }
+        .glass-panel {
+            background: rgba(25, 26, 26, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+<div class="nebula-glow bg-primary-container top-[-200px] left-[-100px]"></div>
+<div class="nebula-glow bg-tertiary bottom-[-100px] right-[-100px]"></div>
+<header class="flex justify-between items-center px-6 h-20 shrink-0">
+<button class="group flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors duration-300" style="">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-0.5 transition-transform" style="">arrow_back</span>
+<span class="text-[10px] font-bold tracking-widest uppercase" style="">Go Back</span>
+</button>
+<div class="w-16"></div>
+</header>
+<main class="flex-1 flex flex-col items-center px-6 max-w-4xl mx-auto w-full pt-8 md:pt-12">
+<section class="w-full flex flex-col items-center mb-6 relative shrink-0">
+<div class="relative group flex flex-col items-center">
+<div class="absolute inset-0 rounded-full bg-[#e08efe]/5 blur-3xl group-hover:bg-[#e08efe]/15 transition-all duration-700 scale-110"></div>
+<div class="relative w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-tr from-outline-variant/20 to-transparent shadow-[0_0_20px_rgba(224,142,254,0.15)]">
+<img alt="Architect Profile" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1Bl6UgspQ7QRiPSy2yEKFjexr-cMrPBBWEcc6_XGZk4_LjYKq8iFlYpSH_b9ZrTn-Y6ausG4zSXjkF6mUX8N73IwGjCr47vdPxjaaVftfq32gyJ_n8I9ZNN4ZYCnUPalYe4_edvj5bmszuOZKqYhkbn9CQN-1JfWF-GxuCQrKiZHjYUQucSx1C29dCaVSLzdAr31WERhrZcHKVj9wVp-6xSGP0XANIC55i7eWts4aeTIm_RMbZc_r55W5yYhNldRTitJo488Ou9Q" style="">
+<div class="absolute bottom-1 right-1 bg-primary-container text-on-primary-container p-2 rounded-full shadow-[0_0_10px_rgba(224,142,254,0.3)] hover:scale-110 transition-transform duration-300 cursor-pointer">
+<span class="material-symbols-outlined text-base" style="">photo_camera</span>
+</div>
+</div>
+<div class="mt-4 text-center">
+<h1 class="font-extrabold tracking-tighter text-3xl md:text-4xl font-headline mb-2" style="">编辑您的 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">星际身份</span></h1>
+<p class="text-on-surface-variant uppercase tracking-[0.3em] text-[8px] font-bold mt-2" style="">THE STAR TRAVELLER</p>
+</div>
+</div>
+</section>
+<section class="w-full max-w-2xl">
+<div class="glass-panel p-6 md:p-7 rounded-xl border border-outline-variant/10 shadow-2xl shadow-fuchsia-900/5">
+<form class="space-y-6">
+<div class="grid grid-cols-1 gap-6">
+<div class="relative group">
+<label class="block uppercase tracking-[0.2em] font-black text-primary mb-1 text-[12px]" style="">星际身份名称</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/20 py-1.5 text-base md:text-lg font-medium focus:ring-0 focus:border-primary transition-all duration-300 placeholder-on-surface-variant/30" placeholder="请输入您的姓名..." type="text" value="Dora The Explorer">
+<div class="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-primary-container to-tertiary group-focus-within:w-full transition-all duration-500"></div>
+</div>
+<div class="relative group">
+<label class="block uppercase tracking-[0.2em] font-black text-primary mb-1 text-[12px]" style="">个人简介与星际寄语</label>
+<textarea class="w-full bg-transparent border-0 border-b border-outline-variant/20 py-1.5 text-sm md:text-base font-light leading-relaxed focus:ring-0 focus:border-primary transition-all duration-300 resize-none placeholder-on-surface-variant/30 overflow-hidden" oninput="this.style.height = &quot;&quot;;this.style.height = this.scrollHeight + &quot;px&quot;" placeholder="在 Aetheris 中定义您的存在..." rows="3" style="height:84px;overflow-y:hidden;">在这个星系里，总会有更大的恒星试图用引力扭曲你的轨道。但别忘了，哪怕是一颗中子星，密度大得惊人，也只需默默旋转，就能让光为之弯曲。不必活成别人的太阳，你只需凝聚自己的内核。 当你足够专注，你的热爱会自然吸引同频的卫星。</textarea>
+<div class="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-primary-container to-tertiary group-focus-within:w-full transition-all duration-500"></div>
+</div>
+</div>
+<div class="flex flex-row items-center justify-end gap-3 pt-2">
+<button class="px-6 py-2 rounded-full text-on-surface-variant font-bold hover:text-on-surface transition-all duration-300 text-xs tracking-widest uppercase" style="" type="button">取消更改</button>
+<button class="px-8 py-2.5 rounded-full bg-gradient-to-tr from-primary-container to-primary-dim text-on-primary-container font-extrabold shadow-[0_0_15px_rgba(224,142,254,0.2)] hover:shadow-[0_0_25px_rgba(224,142,254,0.4)] hover:scale-[1.02] active:scale-95 transition-all duration-300 text-xs tracking-widest uppercase" style="" type="submit">保存身份</button>
+</div>
+</form>
+</div>
+</section>
+</main>
+<footer class="py-2 shrink-0">
+</footer>
+<script>
+        // Initial auto-resize for textarea to ensure full content is visible
+        const tx = document.getElementsByTagName("textarea");
+        for (let i = 0; i < tx.length; i++) {
+            tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
+            tx[i].addEventListener("input", OnInput, false);
+        }
+
+        function OnInput() {
+            this.style.height = 0;
+            this.style.height = (this.scrollHeight) + "px";
+        }
+    </script>
+</body></html>

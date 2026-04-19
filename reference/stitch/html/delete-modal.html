@@ -1,0 +1,191 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#7be7f9",
+                    "inverse-on-surface": "#565555",
+                    "tertiary": "#a8f1ff",
+                    "on-tertiary-fixed-variant": "#005d69",
+                    "surface-dim": "#0e0e0e",
+                    "on-tertiary-container": "#00535e",
+                    "surface-bright": "#2c2c2c",
+                    "tertiary-container": "#7be7f9",
+                    "surface-container-highest": "#262626",
+                    "secondary-fixed": "#e0f7e2",
+                    "on-secondary": "#324536",
+                    "on-primary": "#5d097d",
+                    "surface-container-lowest": "#000000",
+                    "surface-container-high": "#202020",
+                    "primary-container": "#e08efe",
+                    "outline": "#767575",
+                    "error-dim": "#c8475d",
+                    "on-tertiary-fixed": "#003e47",
+                    "background": "#0e0e0e",
+                    "secondary-container": "#172a1c",
+                    "secondary-dim": "#a9beab",
+                    "primary-fixed-dim": "#e395ff",
+                    "on-secondary-container": "#94a997",
+                    "outline-variant": "#484848",
+                    "on-tertiary": "#005c68",
+                    "on-surface": "#e7e5e4",
+                    "surface-tint": "#e7a1ff",
+                    "primary": "#e7a1ff",
+                    "on-primary-container": "#4f006c",
+                    "on-primary-fixed-variant": "#6c1e8b",
+                    "surface": "#0e0e0e",
+                    "on-background": "#e7e5e4",
+                    "tertiary-fixed-dim": "#6cd8eb",
+                    "surface-container": "#191a1a",
+                    "secondary-fixed-dim": "#d2e8d4",
+                    "surface-variant": "#262626",
+                    "primary-fixed": "#eaa9ff",
+                    "on-primary-fixed": "#45005f",
+                    "error": "#fd6f85",
+                    "inverse-surface": "#fcf9f8",
+                    "error-container": "#8a1632",
+                    "on-surface-variant": "#acabaa",
+                    "primary-dim": "#d180ef",
+                    "on-secondary-fixed": "#394c3d",
+                    "on-secondary-fixed-variant": "#556959",
+                    "tertiary-dim": "#6cd8eb",
+                    "surface-container-low": "#131313",
+                    "on-error-container": "#ff97a3",
+                    "on-error": "#490013",
+                    "secondary": "#b6ccb8",
+                    "inverse-primary": "#893da7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans", "Noto Sans SC", "sans-serif"],
+                    "body": ["Plus Jakarta Sans", "Noto Sans SC", "sans-serif"],
+                    "label": ["Plus Jakarta Sans", "Noto Sans SC", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nebula-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(224,142,254,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(129,236,255,0.1) 0%, transparent 50%);
+        }
+        .glass-panel {
+            background: rgba(25, 26, 26, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(72, 72, 72, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- Blurred Background (Timeline Page Simulation) -->
+<main class="fixed inset-0 w-full h-full nebula-bg blur-md saturate-50 opacity-60 pointer-events-none">
+<!-- Top Navigation Mock -->
+<header class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto border-b border-white/5 bg-neutral-950/40 backdrop-blur-xl">
+<span class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">Aetheris</span>
+<div class="flex gap-8 items-center font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-medium">
+<span class="text-fuchsia-300" style="">Chronicles</span>
+<span class="text-neutral-400" style="">Star-Maps</span>
+<span class="text-neutral-400" style="">Nexus</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-fuchsia-300" style="">account_circle</span>
+</div>
+</header>
+<!-- Timeline Content Mock -->
+<div class="max-w-4xl mx-auto py-24 px-8">
+<h1 class="text-5xl font-extrabold tracking-tighter mb-12 opacity-40" style="">Orbital Timeline</h1>
+<div class="space-y-12">
+<div class="flex gap-8 items-start">
+<div class="w-1 h-32 bg-white/10 relative">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-primary-dim"></div>
+</div>
+<div class="glass-panel p-8 rounded-lg flex-1">
+<div class="h-4 w-24 bg-white/10 rounded mb-4"></div>
+<div class="h-8 w-64 bg-white/10 rounded mb-4"></div>
+<div class="h-24 w-full bg-white/10 rounded"></div>
+</div>
+</div>
+<div class="flex gap-8 items-start opacity-50">
+<div class="w-1 h-32 bg-white/10 relative">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-neutral-600"></div>
+</div>
+<div class="glass-panel p-8 rounded-lg flex-1">
+<div class="h-4 w-24 bg-white/10 rounded mb-4"></div>
+<div class="h-8 w-64 bg-white/10 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+<!-- Delete Confirmation Modal -->
+<div class="w-full max-w-md glass-panel rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+<!-- Atmospheric Header Decor -->
+<div class="h-1.5 w-full bg-gradient-to-r from-transparent via-error to-transparent opacity-50"></div>
+<div class="p-8 flex flex-col items-center text-center">
+<!-- Icon Anchor -->
+<div class="w-16 h-16 rounded-full bg-error-container/20 flex items-center justify-center mb-6 border border-error/20">
+<span class="material-symbols-outlined text-error text-3xl" data-icon="delete_forever" style="font-variation-settings: &quot;FILL&quot; 0;">delete_forever</span>
+</div>
+<!-- Content -->
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-4 font-headline" style="">删除故事卡片？</h2>
+<p class="text-on-surface-variant leading-relaxed mb-10 font-body text-base px-2" style="">
+                    确定要删除这段记忆吗？此操作无法撤销。
+                </p>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-4 w-full">
+<button class="flex-1 px-8 py-3.5 rounded-full border border-outline-variant/30 bg-surface-container-highest text-on-surface font-semibold text-sm tracking-wider hover:bg-surface-bright transition-all duration-300 order-2 sm:order-1 active:scale-95" style="">
+                        取消
+                    </button>
+<button class="flex-1 px-8 py-3.5 rounded-full bg-error text-on-error font-extrabold text-sm tracking-wider hover:shadow-[0_0_20px_rgba(253,111,133,0.4)] transition-all duration-300 order-1 sm:order-2 active:scale-95" style="">删除</button>
+</div>
+</div>
+<!-- Bottom Texture -->
+<div class="h-16 w-full flex justify-center items-end pb-4 overflow-hidden pointer-events-none">
+<div class="w-64 h-32 bg-error/5 blur-3xl rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Hidden Sidebar -->
+<nav class="fixed left-0 top-0 h-full w-20 flex flex-col py-20 items-center justify-between bg-neutral-950/60 backdrop-blur-2xl border-r border-white/5 z-40 opacity-20 pointer-events-none">
+<div class="flex flex-col items-center gap-10">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-primary/20">
+<img alt="Architect" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhudIaw6NG7mRDLmzlmZRHevSh5mkPjro7bTr201mnEO3FaWOOCjB9U6lCVsh4vpMmt5rBS6_K_FLsSfKY7B4vSDiWsUOVOX8jBX5scyKC1CnDl0VNlsd_boa46FOZ5lmn_bUOynQmRFfYRaVRqkUP8Z8AYNj2y8euyhEnU733eovbzPGmVX9jwIUO_VEsSJI1826zA5dxN51ezD_gbGVu4Vw-hM5XonFh15Gq8-Fo5WSTHbcE0n55nCuVHVd2W541aPtb7IXJ4z0" style="">
+</div>
+<div class="flex flex-col gap-6">
+<span class="material-symbols-outlined text-primary-dim" data-icon="auto_awesome" style="">auto_awesome</span>
+<span class="material-symbols-outlined text-neutral-500" data-icon="menu_book" style="">menu_book</span>
+<span class="material-symbols-outlined text-neutral-500" data-icon="photo_library" style="">photo_library</span>
+</div>
+</div>
+<div>
+<span class="material-symbols-outlined text-neutral-500" data-icon="help_outline" style="">help_outline</span>
+</div>
+</nav>
+<!-- Universal Footer -->
+<footer class="fixed bottom-0 w-full py-6 flex flex-col items-center justify-center gap-4 bg-black/20 border-t border-white/5 opacity-40 pointer-events-none">
+<div class="flex gap-8 text-[10px] tracking-widest uppercase font-medium text-neutral-600">
+<span class="" style="">Privacy Policy</span>
+<span class="" style="">Terms of Void</span>
+<span class="" style="">Contact</span>
+</div>
+<p class="text-[10px] tracking-widest uppercase text-neutral-700" style="">© 2024 The Celestial Architect. All rights reserved.</p>
+</footer>
+</body></html>

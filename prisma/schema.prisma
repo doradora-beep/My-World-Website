@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id               String   @id @default("main")
+  name             String
+  bio              String
+  avatarImagePath  String
+  avatarPromptJson String
+  updatedAt        DateTime @updatedAt
+}
+
+model StoryCard {
+  id             String   @id @default(cuid())
+  levelId        String
+  themeKey       String
+  title          String
+  summary        String
+  reflection     String
+  mediaType      String
+  mediaPathOrUrl String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model OwnerSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

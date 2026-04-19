@@ -1,0 +1,337 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-dim": "#a9beab",
+                    "surface-dim": "#0e0e0e",
+                    "secondary-fixed": "#e0f7e2",
+                    "primary-container": "#e08efe",
+                    "surface-container": "#191a1a",
+                    "error-container": "#8a1632",
+                    "surface-bright": "#2c2c2c",
+                    "on-tertiary-container": "#00535e",
+                    "primary-fixed": "#eaa9ff",
+                    "surface-container-highest": "#262626",
+                    "inverse-on-surface": "#565555",
+                    "secondary-fixed-dim": "#d2e8d4",
+                    "on-tertiary-fixed": "#003e47",
+                    "on-secondary-fixed": "#394c3d",
+                    "surface-tint": "#e7a1ff",
+                    "on-error-container": "#ff97a3",
+                    "tertiary-container": "#7be7f9",
+                    "inverse-surface": "#fcf9f8",
+                    "tertiary-dim": "#6cd8eb",
+                    "tertiary-fixed-dim": "#6cd8eb",
+                    "secondary": "#b6ccb8",
+                    "on-secondary-fixed-variant": "#556959",
+                    "primary-fixed-dim": "#e395ff",
+                    "on-surface": "#e7e5e4",
+                    "surface-container-low": "#131313",
+                    "on-primary-fixed-variant": "#6c1e8b",
+                    "on-tertiary-fixed-variant": "#005d69",
+                    "surface-variant": "#262626",
+                    "inverse-primary": "#893da7",
+                    "tertiary-fixed": "#7be7f9",
+                    "on-background": "#e7e5e4",
+                    "surface": "#0e0e0e",
+                    "on-primary-fixed": "#45005f",
+                    "primary-dim": "#d180ef",
+                    "on-primary-container": "#4f006c",
+                    "error-dim": "#c8475d",
+                    "secondary-container": "#172a1c",
+                    "outline-variant": "#484848",
+                    "on-secondary-container": "#94a997",
+                    "primary": "#e7a1ff",
+                    "outline": "#767575",
+                    "on-primary": "#5d097d",
+                    "background": "#0e0e0e",
+                    "surface-container-high": "#202020",
+                    "on-tertiary": "#005c68",
+                    "on-error": "#490013",
+                    "on-surface-variant": "#acabaa",
+                    "on-secondary": "#324536",
+                    "surface-container-lowest": "#000000",
+                    "tertiary": "#a8f1ff",
+                    "error": "#fd6f85"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nebula-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(224, 142, 254, 0.15) 0%, rgba(129, 236, 255, 0.05) 50%, transparent 100%);
+        }
+        
+        /* Enhanced Orbital Rings */
+        @keyframes ring-shimmer {
+            0% { opacity: 0.15; border-color: rgba(255, 255, 255, 0.08); }
+            50% { opacity: 0.35; border-color: rgba(224, 142, 254, 0.25); }
+            100% { opacity: 0.15; border-color: rgba(255, 255, 255, 0.08); }
+        }
+        .orbital-ring {
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: inset 0 0 15px rgba(129, 236, 255, 0.05), 0 0 10px rgba(224, 142, 254, 0.05);
+            animation: ring-shimmer 8s ease-in-out infinite;
+        }
+        .orbital-ring-1 { animation-delay: 0s; }
+        .orbital-ring-2 { animation-delay: -2s; }
+        .orbital-ring-3 { animation-delay: -4s; }
+        .orbital-ring-4 { animation-delay: -6s; }
+        .orbital-ring-5 { animation-delay: -1s; }
+
+        .glass-module {
+            backdrop-filter: blur(20px);
+            background: rgba(25, 26, 26, 0.4);
+        }
+        /* Planet Glow Enhancements */
+        .planet-glow-primary:hover {
+            box-shadow: 0 0 40px rgba(224, 142, 254, 0.4), 0 0 60px rgba(224, 142, 254, 0.2);
+        }
+        .planet-glow-tertiary:hover {
+            box-shadow: 0 0 40px rgba(129, 236, 255, 0.4), 0 0 60px rgba(129, 236, 255, 0.2);
+        }
+        .planet-glow-error:hover {
+            box-shadow: 0 0 40px rgba(253, 111, 133, 0.4), 0 0 60px rgba(253, 111, 133, 0.2);
+        }
+        .planet-glow-white:hover {
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Orbiting Particle */
+        .orbit-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px white;
+            animation: rotate-around 4s linear infinite;
+            display: none;
+        }
+        .planet-button:focus .orbit-particle,
+        .planet-button.active .orbit-particle {
+            display: block;
+        }
+
+        @keyframes rotate-around {
+            from { transform: rotate(0deg) translateX(70px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(70px) rotate(-360deg); }
+        }
+
+        /* Intense selection ring */
+        .selection-ring {
+            position: absolute;
+            inset: -4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 9999px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .planet-button:focus .selection-ring {
+            opacity: 1;
+            transform: scale(1.02);
+            border-color: currentColor;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        /* Zero-gravity Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-animation-delay-1 { animation-delay: -1s; }
+        .float-animation-delay-2 { animation-delay: -2s; }
+        .float-animation-delay-3 { animation-delay: -3s; }
+        .float-animation-delay-4 { animation-delay: -4s; }
+        .float-animation-delay-5 { animation-delay: -5s; }
+
+        /* Starfield effect */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png') repeat;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        /* Softened Ethereal Pulse for Central Avatar */
+        @keyframes ethereal-pulse {
+            0% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.25; transform: scale(1.1); }
+            100% { opacity: 0.15; transform: scale(1); }
+        }
+        .ethereal-glow-soft {
+            animation: ethereal-pulse 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff] hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)] transition-all duration-300 cursor-pointer" style="">The Explorer</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-fuchsia-300 scale-110 transition-transform active:scale-95 hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)]" style="">account_circle</button>
+<button class="material-symbols-outlined text-fuchsia-300 scale-110 transition-transform active:scale-95 hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)]" style="">settings</button>
+</div>
+</div>
+</nav>
+<!-- Main Cosmic Canvas -->
+<main class="relative h-screen w-full flex items-center justify-center bg-surface overflow-hidden">
+<!-- Ambient Background Nebula and Stars -->
+<div class="absolute inset-0 z-0 overflow-hidden">
+<div class="stars"></div>
+<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] animate-pulse"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[700px] h-[700px] bg-tertiary/10 rounded-full blur-[180px] animate-pulse" style="animation-delay: 2s;"></div>
+<div class="absolute top-1/3 right-1/4 w-96 h-96 bg-error/5 rounded-full blur-[120px]"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-surface/80"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-40 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, transparent 20%, rgba(14,14,14,0.9) 100%);"></div>
+</div>
+<!-- Central Solar System Structure -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-100">
+<!-- Delicate Orbital Path Lines - Enhanced Visibility and Glow -->
+<div class="orbital-ring orbital-ring-1 w-[400px] h-[400px] rounded-full"></div>
+<div class="orbital-ring orbital-ring-2 w-[650px] h-[650px] rounded-full"></div>
+<div class="orbital-ring orbital-ring-3 w-[950px] h-[950px] rounded-full opacity-80"></div>
+<div class="orbital-ring orbital-ring-4 w-[1300px] h-[1300px] rounded-full opacity-60"></div>
+<div class="orbital-ring orbital-ring-5 w-[1600px] h-[1600px] rounded-full opacity-40"></div>
+</div>
+<!-- Central Welcome Content -->
+<div class="relative z-10 text-center px-6 pointer-events-none -translate-y-12 max-w-3xl float-animation">
+<div class="flex flex-col items-center pointer-events-auto mb-10">
+<div class="w-40 h-40 rounded-full border-2 border-primary/40 p-1.5 mb-8 relative group cursor-pointer transition-all duration-700 hover:scale-105">
+<!-- Softened Glow -->
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-3xl group-hover:bg-tertiary/30 transition-colors ethereal-glow-soft"></div>
+<img alt="Owner" class="w-full h-full rounded-full object-cover relative z-10 border-2 border-white/20" data-alt="Close up of a futuristic architect with glowing headpiece and ethereal features against a starfield background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmIOYajnms4qZUKkIjyOSsVmlyCPUZ9yShp5WlVuygu0GHzgZKaWoUFP3rAygJpHHa8YIRgvjlkN0zSh5cYcOupC-XpHSfBvAOgs3bHVm7U41CwBIOa8iiC8f_7Eu532lZx7vkhwahNOc4XGp2bhZDUw-3b6O_oyACs_ChhbQGTD6HKuUMHds1fCUIKEQyrtUUz1UbgDUXuk7hi02s_qftJNE4CQhAHKMJWQi2RPlf9alCfwRMY3DG_PW-b0UVgsuiwOLjDlSP1DQ" style="">
+</div>
+<h1 class="font-headline text-4xl font-extrabold tracking-tighter leading-tight bg-clip-text text-transparent bg-gradient-to-b from-on-surface to-on-surface-variant mb-3" style="">欢迎来到我的世界<br><span class="italic font-light opacity-100 block mt-2 text-2xl" style="">请选择关卡探索我的故事</span></h1>
+</div>
+</div>
+<!-- Interactive Level Planets -->
+<div class="absolute inset-0 pointer-events-none z-20">
+<!-- Planet 1: Genesis - Top Left. Size: 116.7px -->
+<button class="planet-button absolute top-[15%] left-[20%] group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none float-animation float-animation-delay-1" style="">
+<div class="relative rounded-full overflow-hidden shadow-[0_0_60px_rgba(224,142,254,0.4)] border border-white/20 planet-glow-primary transition-all duration-500 w-[116.7px] h-[116.7px]">
+<div class="absolute inset-0 bg-gradient-to-br from-black via-black/40 to-[#e08efe] opacity-90"></div>
+<div class="absolute inset-0 mix-blend-overlay opacity-30 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+<div class="selection-ring text-primary"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-primary-fixed uppercase mb-1" style="">Level 02</span>
+<span class="text-xs tracking-[0.2em] font-medium text-primary uppercase whitespace-nowrap" style="">我的家庭</span>
+</div>
+</button>
+<!-- Planet 2: Echoes -->
+<button class="planet-button absolute group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none right-[12%] top-[12%] float-animation float-animation-delay-2" style="">
+<div class="relative w-[116.7px] h-[116.7px] rounded-full overflow-hidden shadow-[0_0_40px_rgba(129,236,255,0.4)] border border-white/20 planet-glow-tertiary transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-bl from-black via-surface-container-low to-tertiary opacity-90"></div>
+<div class="selection-ring text-tertiary"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-tertiary-fixed-dim uppercase mb-1" style="">LEVEL 03</span>
+<span class="text-xs tracking-[0.2em] font-medium text-tertiary uppercase whitespace-nowrap" style="">我的最爱</span>
+</div>
+</button>
+<!-- Planet 3: The Void -->
+<button class="planet-button absolute bottom-[22%] left-[30%] group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none float-animation float-animation-delay-3" style="">
+<div class="relative w-[102.1px] h-[102.1px] rounded-full overflow-hidden shadow-[0_0_50px_rgba(255,255,255,0.2)] border border-white/15 planet-glow-white transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-tr from-black via-surface-container-highest to-neutral-600 opacity-95"></div>
+<div class="selection-ring text-white"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-on-surface-variant uppercase mb-1" style="">LEVEL 01</span>
+<span class="text-xs tracking-[0.2em] font-medium text-on-surface uppercase whitespace-nowrap" style="">我的学校生活</span>
+</div>
+</button>
+<!-- Planet 4: Radiance -->
+<button class="planet-button absolute group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none right-[15%] bottom-[36%] float-animation float-animation-delay-4" style="">
+<div class="relative rounded-full overflow-hidden shadow-[0_0_70px_rgba(224,142,254,0.5)] border border-white/30 planet-glow-primary transition-all duration-500 w-[131.3px] h-[131.3px]">
+<div class="absolute inset-0 bg-gradient-to-l from-black via-[#e08efe]/50 to-[#81ecff] opacity-50 animate-pulse"></div>
+<div class="absolute inset-0 bg-black/50"></div>
+<div class="selection-ring text-[#e08efe]"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-primary-fixed uppercase mb-1" style="">LEVEL 04</span>
+<span class="text-xs tracking-[0.2em] font-medium text-primary-fixed uppercase whitespace-nowrap" style="">我的梦想</span>
+</div>
+</button>
+<!-- Planet 5: Archive -->
+<button class="planet-button absolute top-[48%] left-[10%] group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none float-animation float-animation-delay-5" style="">
+<div class="relative w-[116.7px] h-[116.7px] rounded-full overflow-hidden shadow-[0_0_40px_rgba(169,190,171,0.3)] border border-white/15 planet-glow-primary transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-r from-black via-surface-container to-secondary opacity-90"></div>
+<div class="selection-ring text-secondary"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-secondary-dim uppercase mb-1" style="">LEVEL 05</span>
+<span class="text-xs tracking-[0.2em] font-medium text-secondary uppercase whitespace-nowrap" style="">我的快乐回忆</span>
+</div>
+</button>
+<!-- Planet 6: Zenith -->
+<button class="planet-button absolute group pointer-events-auto transition-all duration-500 hover:scale-105 focus:outline-none bottom-[18%] right-[32%] float-animation active" style="">
+<div class="relative w-[102.1px] h-[102.1px] rounded-full overflow-hidden shadow-[0_0_40px_rgba(253,111,133,0.4)] border border-white/15 planet-glow-error transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-tl from-black via-surface-container-low to-error opacity-90"></div>
+<div class="selection-ring text-error"></div>
+<div class="orbit-particle"></div>
+</div>
+<div class="mt-4 flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+<span class="text-[10px] tracking-[0.4em] font-bold text-error-dim uppercase mb-1" style="">LEVEL 06</span>
+<span class="text-xs tracking-[0.2em] font-medium text-error uppercase whitespace-nowrap" style="">我的成长里程碑</span>
+</div>
+</button>
+</div>
+<!-- Scroll Indicator -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+<span class="font-label text-[10px] tracking-widest uppercase text-on-surface-variant" style="">Traverse the Stars</span>
+<div class="w-0.5 h-12 bg-gradient-to-b from-primary to-transparent"></div>
+</div>
+</main>
+<script>
+        // Simple script to toggle "active" class on planet buttons for demonstration
+        document.querySelectorAll('.planet-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.planet-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aetheris | 我的快乐回忆</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-dim": "#a9beab",
+                    "surface-dim": "#0e0e0e",
+                    "secondary-fixed": "#e0f7e2",
+                    "primary-container": "#e08efe",
+                    "surface-container": "#191a1a",
+                    "error-container": "#8a1632",
+                    "surface-bright": "#2c2c2c",
+                    "on-tertiary-container": "#00535e",
+                    "primary-fixed": "#eaa9ff",
+                    "surface-container-highest": "#262626",
+                    "inverse-on-surface": "#565555",
+                    "secondary-fixed-dim": "#d2e8d4",
+                    "on-tertiary-fixed": "#003e47",
+                    "on-secondary-fixed": "#394c3d",
+                    "surface-tint": "#e7a1ff",
+                    "on-error-container": "#ff97a3",
+                    "tertiary-container": "#7be7f9",
+                    "inverse-surface": "#fcf9f8",
+                    "tertiary-dim": "#6cd8eb",
+                    "tertiary-fixed-dim": "#6cd8eb",
+                    "secondary": "#b6ccb8",
+                    "on-secondary-fixed-variant": "#556959",
+                    "primary-fixed-dim": "#e395ff",
+                    "on-surface": "#e7e5e4",
+                    "surface-container-low": "#131313",
+                    "on-primary-fixed-variant": "#6c1e8b",
+                    "on-tertiary-fixed-variant": "#005d69",
+                    "surface-variant": "#262626",
+                    "inverse-primary": "#893da7",
+                    "tertiary-fixed": "#7be7f9",
+                    "on-background": "#e7e5e4",
+                    "surface": "#0e0e0e",
+                    "on-primary-fixed": "#45005f",
+                    "primary-dim": "#d180ef",
+                    "on-primary-container": "#4f006c",
+                    "error-dim": "#c8475d",
+                    "secondary-container": "#172a1c",
+                    "outline-variant": "#484848",
+                    "on-secondary-container": "#94a997",
+                    "primary": "#e7a1ff",
+                    "outline": "#767575",
+                    "on-primary": "#5d097d",
+                    "background": "#0e0e0e",
+                    "surface-container-high": "#202020",
+                    "on-tertiary": "#005c68",
+                    "on-error": "#490013",
+                    "on-surface-variant": "#acabaa",
+                    "on-secondary": "#324536",
+                    "surface-container-lowest": "#000000",
+                    "tertiary": "#a8f1ff",
+                    "error": "#fd6f85"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0e;
+            color: #e7e5e4;
+            font-family: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden;
+        }
+        .nebula-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 30%, rgba(224, 142, 254, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(129, 236, 255, 0.1) 0%, transparent 40%);
+        }
+        .time-axis-line {
+            background: linear-gradient(to bottom, transparent, #484848 10%, #484848 90%, transparent);
+            width: 1.5px;
+            opacity: 0.2;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-glow {
+            box-shadow: 0 0 40px rgba(224, 142, 254, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-surface selection:bg-primary-container selection:text-on-primary-container">
+<div class="nebula-bg"></div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5 shadow-[0_0_30px_rgba(224,142,254,0.1)]">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff]" style="">
+                The Explorer
+            </div>
+<div class="flex items-center gap-4 text-neutral-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" style="">account_circle</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" style="">settings</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="px-8 pb-24 min-h-screen max-w-[1440px] mx-auto pt-[120px]">
+<!-- Back Navigation & Title -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+<div class="max-w-2xl">
+<button class="flex items-center gap-2 px-6 py-2 rounded-full bg-surface-container-high border border-outline-variant/20 text-sm font-medium hover:bg-surface-bright transition-all group mb-10" style="">
+<span class="material-symbols-outlined text-primary group-hover:-translate-x-1 transition-transform" data-icon="arrow_back" style="">arrow_back</span>
+                    Back to Orbit
+                </button>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface leading-none mb-4" style="">
+                    我的<span class="text-primary-container" style="">快乐回忆</span>
+</h1>
+<p class="text-on-surface-variant text-base max-w-lg leading-relaxed" style="">在我的星系世界里，沿着时间轴探索我的故事吧。这段致密的时光终将帮我拥有属于自己的引力和光。</p>
+</div>
+<div class="flex flex-col items-end">
+<div class="text-tertiary font-bold tracking-[0.2em] text-xs uppercase mb-2" style="">当前纪元</div>
+<div class="text-3xl font-light text-on-surface" style="">2026.04.15</div>
+</div>
+</div>
+<!-- Time Axis Exploration -->
+<div class="relative flex flex-col items-center py-0">
+<!-- The Axis Line -->
+<div class="absolute top-0 bottom-0 time-axis-line left-1/2 -translate-x-1/2 z-0"></div>
+<!-- Memory Nodes -->
+<div class="w-full relative z-10 space-y-32">
+<!-- Node 1: Left Aligned -->
+<div class="flex flex-col md:flex-row items-center justify-center w-full group">
+<div class="w-full md:w-1/2 md:pr-24 flex justify-end order-2 md:order-1">
+<div class="relative max-w-sm w-full">
+<div class="absolute -inset-4 bg-primary-container/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-6 border border-outline-variant/20 hover:border-primary/40 transition-all duration-300 cursor-pointer overflow-hidden card-glow">
+<img class="w-full h-48 object-cover rounded-md mb-6 grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Stunning deep space nebula" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY-DfPFtfONtWLO2uMewSeqke5CATe9GVEJF9BKfOdcJnrYxr3Zbi4D_mrVrnTwHk5IDsSxAX_Fv4bn7kHp1OtVWsEN44teE-Ita3dGxJ2tlZyJLzxcMbCkZz81KQcrGU88WPRRimEdsKv212BQtBeAlBcEmIk_qa-FC6TxD0R4OiWjcqqdhdokhwmVq_QFPi8oGrDlTfZlLiHsxTRfjrpiZno8ao7rrxGsycyHG3dmj3yhPG332quQnaSmNgoZabRX8s-bwXXUv0" style="">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold tracking-tight text-white" style="">最初的共鸣</h3>
+</div>
+<p class="text-on-surface-variant text-sm line-clamp-3 leading-relaxed" style="">初次接触轨道架构，苍穹虚空的基石在此奠定。这段记忆记录了我们是如何在繁星之间寻找那唯一的信号发射源，并建立起持久的联系。</p>
+</div>
+</div>
+</div>
+<!-- Axis Point -->
+<div class="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
+<div class="w-4 h-4 rounded-full bg-primary border-4 border-surface shadow-[0_0_15px_rgba(224,142,254,0.6)]"></div>
+</div>
+<div class="w-full md:w-1/2 md:pl-24 order-3">
+<div class="text-on-surface-variant font-mono text-sm tracking-widest opacity-40" style="">T-MINUS 12,000Y</div>
+</div>
+</div>
+<!-- Node 2: Right Aligned -->
+<div class="flex flex-col md:flex-row items-center justify-center w-full group">
+<div class="w-full md:w-1/2 md:pr-24 text-right order-3 md:order-1">
+<div class="text-on-surface-variant font-mono text-sm tracking-widest opacity-40" style="">T-MINUS 8,400Y</div>
+</div>
+<!-- Axis Point -->
+<div class="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
+<div class="w-4 h-4 rounded-full bg-tertiary border-4 border-surface shadow-[0_0_15px_rgba(129,236,255,0.6)]"></div>
+</div>
+<div class="w-full md:w-1/2 md:pl-24 order-2">
+<div class="relative max-w-sm w-full">
+<div class="absolute -inset-4 bg-tertiary/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-6 border border-outline-variant/20 hover:border-tertiary/40 transition-all duration-300 cursor-pointer overflow-hidden card-glow">
+<img class="w-full h-48 object-cover rounded-md mb-6 grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Digital planet earth with data networks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPn9R1uC38XYmHMbqgTjN551KC9iA8VruniRc1FuyVcM8wkKzRtj-3a3asWr88s5Hnvqae1dsQyHDuOLSENOp0ZR-4cKVFkZZhNoz3pvdYqBUG2-PP4yxDYsyzh8bOcegS0D6PK19zwNwoh8VYyDg82sGvzNVs3UWDTmbAxJ1NJiwVgGgLstvBZlK0RwK_qUopVJR4myOF7Uh1Lwh8AeiRdiufM9IaUVrIXvWTuBZ7Yo3c4sRZ7nCJlU615nTVnAHW9Eyv7qE7oxg" style="">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold tracking-tight text-white" style="">伟大的网格</h3>
+</div>
+<p class="text-on-surface-variant text-sm line-clamp-3 leading-relaxed" style="">跨越广阔空间同步轨道节点。在此阶段，数据流逐渐产生意识，星系间的互联网络开始展现出其独特的生命力与智慧光芒。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Node 3: Left Aligned -->
+<div class="flex flex-col md:flex-row items-center justify-center w-full group">
+<div class="w-full md:w-1/2 md:pr-24 flex justify-end order-2 md:order-1">
+<div class="relative max-w-sm w-full">
+<div class="absolute -inset-4 bg-primary-container/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-6 border border-outline-variant/20 hover:border-primary/40 transition-all duration-300 cursor-pointer overflow-hidden card-glow">
+<img class="w-full h-48 object-cover rounded-md mb-6 grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Surreal landscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNViPpXpHBfpmwwoNaJEW75u0ISLV097R5DWLQo_dHkqn_i6lPg_Q61f15v7xeBaZhFhFYZ0JVECgsS3vRXy5j_jwYOKlwnoJYzvhD87Uq-r2M83xSzJTByOyok5JUJEypbDquH8zhQldQ-kSuvDtWeFCHMe0HDpvdhTvIXZZ1xVgVVvtXR1SL4InPSzCnJA1zzqzG-5d1o1duHpDUFtHOEmPaF3-5LEbjIdC6DkDTJ7Wz8DPV5wvhHFzoWXODwiHA1TvBuDG4Ls8" style="">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-2xl font-bold tracking-tight text-white" style="">静默的回响</h3>
+</div>
+<p class="text-on-surface-variant text-sm line-clamp-3 leading-relaxed" style="">传输过程中出现的绝对寂静时期。记录显示这是一次大规模的意识上传活动，所有的喧嚣都在此刻归于虚无，等待着下一次爆发。</p>
+</div>
+</div>
+</div>
+<!-- Axis Point -->
+<div class="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
+<div class="w-4 h-4 rounded-full bg-primary border-4 border-surface shadow-[0_0_15px_rgba(224,142,254,0.6)]"></div>
+</div>
+<div class="w-full md:w-1/2 md:pl-24 order-3">
+<div class="text-on-surface-variant font-mono text-sm tracking-widest opacity-40" style="">T-MINUS 2,100Y</div>
+</div>
+</div>
+<!-- Node 4: Final Marker -->
+<div class="flex flex-col md:flex-row items-center justify-center w-full group pt-8">
+<div class="w-full md:w-1/2 md:pr-24 text-right order-3 md:order-1">
+<div class="text-tertiary font-mono text-sm tracking-widest animate-pulse" style="">PRESENT DAY</div>
+</div>
+<!-- Axis Point -->
+<div class="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
+<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary-container to-tertiary shadow-[0_0_30px_rgba(129,236,255,0.8)]"></div>
+</div>
+<div class="w-full md:w-1/2 md:pl-24 order-2">
+<div class="text-on-surface font-bold tracking-tighter text-xl" style="">探索我的世界</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 flex flex-col items-center justify-center border-t border-white/5 bg-black mt-auto">
+<div class="text-neutral-500 font-['Plus_Jakarta_Sans'] text-[10px] tracking-widest uppercase opacity-60" style="">
+            © 2026 THE CELESTIAL ARCHITECT.
+        </div>
+</footer>
+<!-- Interaction Overlay -->
+<div class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl hidden items-center justify-center p-8" id="detail-overlay">
+<div class="relative w-full max-w-5xl bg-surface-container rounded-xl overflow-hidden shadow-2xl border border-white/10 flex flex-col md:flex-row">
+<button class="absolute top-6 right-6 z-10 text-white/50 hover:text-white transition-colors" onclick="document.getElementById('detail-overlay').classList.add('hidden')" style="">
+<span class="material-symbols-outlined text-4xl" style="">close</span>
+</button>
+<div class="w-full md:w-3/5 h-[400px] md:h-auto relative">
+<img class="w-full h-full object-cover" data-alt="Detailed close up of cosmic star cluster" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCM57MteWygbyWIdhICAVHXO7hWOxWhWDiwp2DPxgZyN4XttVkLOEn-bN2tjZTepXNPM9XXiCMWI5TqTI3fYM32nlFehNcSdX7NEV10wf60MZUVj-Phr5ArRqIFoGaeQSIHGNbNeTTZCWqCZSnNnLKcCuGQoBIsDgZiNFpiaCR9CZoZQ_K22D-6gPfeDbgQdwAJ2TIdCsBJqFNg2cuk14ODqNfDE6YGKdUe9i-aazYdLIJ1OUZoNFss_hHzSTT35Iw3Wicr2WK2exE" style="">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+</div>
+<div class="w-full md:w-2/5 p-12 flex flex-col justify-center">
+<div class="text-tertiary font-mono text-xs mb-4" style="">节点档案</div>
+<h2 class="text-4xl font-bold tracking-tighter mb-6 text-white leading-tight" style="">最初的共鸣</h2>
+<p class="text-on-surface-variant leading-relaxed mb-8" style="">
+                    最初只有黑曜石般的基底。第一次共鸣标志着生物意识与晶体矩阵对接的瞬间。这个节点代表了后续所有轨道架构的起源。
+                </p>
+<div class="flex gap-4">
+<button class="px-8 py-3 rounded-full bg-gradient-to-br from-primary-container to-primary-dim text-black font-bold text-sm shadow-[0_0_15px_rgba(224,142,254,0.4)] hover:shadow-[0_0_25px_rgba(224,142,254,0.6)] transition-all" style="">
+                        扩展数据
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+        document.querySelectorAll('.group .relative.bg-surface-container-high').forEach(card => {
+            card.addEventListener('click', () => {
+                document.getElementById('detail-overlay').classList.remove('hidden');
+            });
+        });
+    </script>
+</body></html>
