@@ -28,7 +28,18 @@ The MVP focuses on one shared front-end experience with two states:
 
 ## Run Locally
 
-Open [index.html](/Users/dora/Documents/test/lesson-orchestrator/index.html) directly in a browser, or serve the folder with any static server.
+Start the full local dev environment with:
+
+```bash
+./dev
+```
+
+This command prefers the Node runtime bundled in `.tools/` and falls back to your system `npm` if available.
+
+After startup:
+
+- Frontend: `http://localhost:5173/`
+- Backend: `http://127.0.0.1:3001/`
 
 ## Demo Notes
 

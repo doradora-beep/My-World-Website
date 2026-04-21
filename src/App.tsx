@@ -41,6 +41,7 @@ type ProfileDraft = {
 };
 
 type CardEditorMode = "create" | "edit";
+type CardEditorReturnTarget = "level" | "detail" | null;
 
 type CardDraft = {
   mode: CardEditorMode;
@@ -92,7 +93,7 @@ async function api<T>(input: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
-function formatDate(value: string) {
+function formatDate(value: string | Date) {
   return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
     month: "2-digit",
@@ -100,8 +101,15 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function formatEpochDate(value: string) {
+function formatEpochDate(value: string | Date) {
   return formatDate(value).replace(/\//g, ".");
+}
+
+function splitReflectionParagraphs(value: string) {
+  return value
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 }
 
 function resolveProfileAvatar(value: string) {
@@ -183,6 +191,36 @@ function toEmbeddableVideoUrl(value: string) {
   }
 
   return null;
+}
+
+function withAutoplayVideoUrl(value: string) {
+  try {
+    const url = new URL(value, "http://localhost");
+
+    if (url.pathname.startsWith("/uploads/")) {
+      return value;
+    }
+
+    if (url.hostname.includes("youtube.com")) {
+      url.searchParams.set("autoplay", "1");
+      url.searchParams.set("rel", "0");
+      url.searchParams.set("modestbranding", "1");
+      url.searchParams.set("playsinline", "1");
+      return url.toString();
+    }
+
+    if (url.hostname.includes("vimeo.com")) {
+      url.searchParams.set("autoplay", "1");
+      url.searchParams.set("title", "0");
+      url.searchParams.set("byline", "0");
+      url.searchParams.set("portrait", "0");
+      return url.toString();
+    }
+
+    return value;
+  } catch {
+    return value;
+  }
 }
 
 function getVideoPosterUrl(urlString: string, label: string) {
@@ -324,10 +362,10 @@ function emptyCardDraft(levelId: string): CardDraft {
 
 const TIMELINE_MARKERS = ["T-MINUS 12,000Y", "T-MINUS 8,400Y", "T-MINUS 2,100Y"];
 
-function SiteFooter({ label = "© 2024 THE CELESTIAL ARCHITECT." }: { label?: string }) {
+function SiteFooter({ label = "© 2026 THE CELESTIAL ARCHITECT." }: { label?: string }) {
   return (
-    <footer className="w-full py-6 flex flex-col items-center justify-center border-t border-white/5 bg-black/90">
-      <div className="text-neutral-500 text-[9px] tracking-[0.22em] uppercase opacity-60">{label}</div>
+    <footer className="w-full py-8 flex flex-col items-center justify-center border-t border-white/5 bg-black mt-auto">
+      <div className="text-neutral-500 text-[10px] tracking-widest uppercase opacity-60">{label}</div>
     </footer>
   );
 }
@@ -428,6 +466,7 @@ export default function App() {
   const [avatarCandidates, setAvatarCandidates] = useState<string[]>([]);
   const [viewedCardIds, setViewedCardIds] = useState<string[]>([]);
   const [deleteReturnsToDetail, setDeleteReturnsToDetail] = useState(false);
+  const [cardEditorReturnTarget, setCardEditorReturnTarget] = useState<CardEditorReturnTarget>(null);
 
   const navigate = useNavigate();
 
@@ -547,11 +586,14 @@ export default function App() {
 
   function openCreateCard(levelId: string) {
     setCardDraft(emptyCardDraft(levelId));
+    setCardEditorReturnTarget(null);
     setOverlay("card-editor");
   }
 
-  function openEditCard(card: StoryCardDto) {
+  function openEditCard(card: StoryCardDto, returnTarget: CardEditorReturnTarget = "level") {
+    setSelectedCardId(card.id);
     setCardDraft(draftFromCard(card));
+    setCardEditorReturnTarget(returnTarget);
     setOverlay("card-editor");
   }
 
@@ -766,6 +808,7 @@ export default function App() {
 
       setOverlay(null);
       setCardDraft(null);
+      setCardEditorReturnTarget(null);
     } catch (error) {
       setNotice({
         tone: "error",
@@ -847,7 +890,7 @@ export default function App() {
                 setDeleteReturnsToDetail(false);
                 setOverlay("delete");
               }}
-              onOpenEdit={openEditCard}
+              onOpenEdit={(card) => openEditCard(card, "level")}
               onExitEditMode={() => {
                 void handleExitEditMode();
               }}
@@ -952,7 +995,7 @@ export default function App() {
             setDeleteReturnsToDetail(true);
             setOverlay("delete");
           }}
-          onEdit={() => openEditCard(selectedCard)}
+          onEdit={() => openEditCard(selectedCard, "detail")}
         />
       ) : null}
 
@@ -961,7 +1004,13 @@ export default function App() {
           draft={cardDraft}
           saving={working === "card"}
           onClose={() => {
-            setOverlay(cardDraft.mode === "edit" && selectedCard ? "card-detail" : null);
+            if (cardDraft.mode === "edit" && cardEditorReturnTarget === "detail" && selectedCard) {
+              setOverlay("card-detail");
+            } else {
+              setOverlay(null);
+            }
+            setCardDraft(null);
+            setCardEditorReturnTarget(null);
           }}
           onSave={(draft) => {
             void handleSaveCard(draft);
@@ -1111,7 +1160,7 @@ function TopNav({
   onExitEditMode?: () => void;
 }) {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5">
+    <nav className="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-xl border-b border-white/5 shadow-[0_0_30px_rgba(224,142,254,0.1)]">
       <div className="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
         <button className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#e08efe] to-[#81ecff] hover:drop-shadow-[0_0_10px_rgba(129,236,255,0.6)] transition-all duration-300 cursor-pointer">
           The Explorer
@@ -1194,33 +1243,42 @@ function LevelRoute(props: {
         onExitEditMode={props.onExitEditMode}
         ownerAuthenticated={props.ownerAuthenticated}
       />
-      <main className="px-8 min-h-screen max-w-[1440px] mx-auto pt-[120px] flex flex-col">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="stars opacity-[0.11]" />
+        <div className="absolute inset-0 level-atmosphere" />
+        <div className="absolute inset-0 level-vignette" />
+        <div className="absolute -left-[18%] top-[15%] h-[620px] w-[620px] rounded-full bg-primary-container/10 blur-[180px]" />
+        <div className="absolute -right-[16%] top-[30%] h-[560px] w-[560px] rounded-full bg-tertiary/9 blur-[175px]" />
+        <div className="absolute top-10 left-1/2 h-[220px] w-[760px] -translate-x-1/2 rounded-full bg-white/4 blur-[140px]" />
+        <div className="absolute bottom-[12%] left-1/2 h-[280px] w-[520px] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[160px]" />
+      </div>
+      <main className="relative px-6 md:px-8 pb-6 min-h-screen max-w-[1440px] mx-auto pt-[96px] md:pt-[104px] flex flex-col">
+        <div className="flex flex-col md:flex-row md:items-start justify-between mb-14 md:mb-16 gap-8">
           <div className="max-w-2xl">
             <button
-              className="flex items-center gap-2 px-6 py-2 rounded-full bg-surface-container-high border border-outline-variant/20 text-sm font-medium hover:bg-surface-bright transition-all group mb-10"
+              className="flex items-center gap-2 px-6 py-2 rounded-full bg-surface-container-high border border-outline-variant/20 text-sm font-medium hover:bg-surface-bright transition-all group mb-7 md:mb-8"
               onClick={props.onGoHome}
             >
               <span className="material-symbols-outlined text-primary group-hover:-translate-x-1 transition-transform">arrow_back</span>
               Back to Orbit
             </button>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface leading-none mb-4">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-on-surface leading-tight mb-4">
               我的<span className="text-primary-container">{level.accentLabel}</span>
             </h1>
             <p className="text-on-surface-variant text-base max-w-lg">
               在我的星系世界里，沿着时间轴探索我的故事吧。这段致密的时光终将帮我拥有属于自己的引力和光。
             </p>
           </div>
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end md:pt-[7.2rem]">
             <div className="text-tertiary font-bold tracking-[0.2em] text-xs uppercase mb-2">当前纪元</div>
-            <div className="text-3xl font-light text-on-surface">{formatEpochDate(props.profileUpdatedAt)}</div>
+            <div className="text-[1.55rem] md:text-[1.75rem] font-light text-on-surface">{formatEpochDate(new Date())}</div>
           </div>
         </div>
 
         {cards.length === 0 && !props.ownerAuthenticated ? (
           <div className="flex-grow flex flex-col items-center justify-center py-20 text-center">
             <div className="max-w-2xl">
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface leading-tight mb-6">
+              <h2 className="text-[2.2rem] md:text-[2.9rem] font-extrabold tracking-tight text-on-surface leading-tight mb-6">
                 这个星球很<span className="text-primary/40">安静。</span>
               </h2>
               <p className="text-on-surface-variant text-base md:text-lg font-medium tracking-tight opacity-60">该关卡还没有故事内容</p>
@@ -1233,10 +1291,14 @@ function LevelRoute(props: {
             </div>
           </div>
         ) : (
-          <div className="relative flex flex-col items-center py-0 flex-grow">
-          <div className="absolute top-0 bottom-0 time-axis-line left-1/2 -translate-x-1/2 z-0" />
+          <div className="relative flex flex-col items-center py-0 pb-6 md:pb-8 flex-grow">
+          <div className="absolute left-1/2 top-0 bottom-0 z-0 timeline-axis-glow -translate-x-1/2" />
+          <div className="absolute left-1/2 top-0 bottom-0 z-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+          <div className="absolute left-1/2 top-0 bottom-0 time-axis-line -translate-x-1/2 z-0" />
+          <div className="absolute left-1/2 top-[14%] z-0 h-32 w-32 -translate-x-1/2 rounded-full bg-primary-container/10 blur-[70px]" />
+          <div className="absolute left-1/2 bottom-[12%] z-0 h-40 w-40 -translate-x-1/2 rounded-full bg-tertiary/10 blur-[90px]" />
           <div className="w-full relative z-10 space-y-32">
-            {props.ownerAuthenticated ? (
+            {props.ownerAuthenticated && cards.length > 0 ? (
               <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 <div className="w-full md:w-1/2 md:pr-24 flex justify-end order-2 md:order-1">
                   <div className="relative max-w-sm w-full">
@@ -1247,7 +1309,7 @@ function LevelRoute(props: {
                       <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/20 text-primary group-hover:scale-110 transition-transform">
                         <span className="material-symbols-outlined text-3xl">add</span>
                       </div>
-                      <span className="text-xs font-bold tracking-[0.2em] uppercase text-on-surface-variant group-hover:text-primary transition-colors">新增故事卡片</span>
+                      <span className="text-base font-normal tracking-normal text-on-surface-variant group-hover:text-primary transition-colors">新增故事卡片</span>
                     </button>
                   </div>
                 </div>
@@ -1256,6 +1318,10 @@ function LevelRoute(props: {
                 </div>
                 <div className="w-full md:w-1/2 md:pl-24 order-3" />
               </div>
+            ) : null}
+
+            {props.ownerAuthenticated && cards.length === 0 ? (
+              <EmptyTimelineCreateNode marker={TIMELINE_MARKERS[0]} onCreate={() => props.onOpenCreateCard(levelId)} />
             ) : null}
 
             {cards.length ? (
@@ -1275,26 +1341,30 @@ function LevelRoute(props: {
               <div className="hidden" />
             )}
 
-            {cards.length ? (
-              <div className="flex flex-col md:flex-row items-center justify-center w-full group pt-8">
+            {(cards.length > 0 || props.ownerAuthenticated) ? (
+              <div className="flex flex-col md:flex-row items-center justify-center w-full group pt-10 md:pt-12 pb-2">
                 <div className="w-full md:w-1/2 md:pr-24 text-right order-3 md:order-1">
-                  <div className="text-tertiary font-mono text-sm tracking-widest animate-pulse uppercase">
-                    {props.ownerAuthenticated ? "PRESENT DAY" : "PRESENT DAY"}
-                  </div>
+                  <div className="text-tertiary font-mono text-sm tracking-widest animate-pulse uppercase">PRESENT DAY</div>
                 </div>
                 <div className="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-container to-tertiary shadow-[0_0_30px_rgba(129,236,255,0.8)]" />
                 </div>
                 <div className="w-full md:w-1/2 md:pl-24 order-2">
-                  <div className="text-on-surface font-bold tracking-tighter text-xl">{props.ownerAuthenticated ? "故事预览" : "探索我的世界"}</div>
+                  <button
+                    className="text-on-surface font-bold tracking-tighter text-xl transition-colors hover:text-primary-container"
+                    onClick={props.onGoHome}
+                    type="button"
+                  >
+                    继续探索我的世界
+                  </button>
                 </div>
               </div>
             ) : null}
           </div>
         </div>
         )}
-        <SiteFooter />
       </main>
+      <SiteFooter />
     </>
   );
 }
@@ -1371,6 +1441,39 @@ function TimelineNode({
   );
 }
 
+function EmptyTimelineCreateNode({
+  marker,
+  onCreate
+}: {
+  marker: string;
+  onCreate: () => void;
+}) {
+  return (
+    <div className="flex flex-col md:flex-row items-center justify-center w-full group">
+      <div className="w-full md:w-1/2 md:pr-24 flex justify-end order-2 md:order-1">
+        <div className="relative max-w-sm w-full">
+          <button
+            className="border-2 border-dashed border-outline-variant/30 rounded-lg p-10 flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group w-full"
+            onClick={onCreate}
+            type="button"
+          >
+            <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/20 text-primary group-hover:scale-110 transition-transform">
+              <span className="material-symbols-outlined text-3xl">add</span>
+            </div>
+            <span className="text-base font-normal tracking-normal text-on-surface-variant group-hover:text-primary transition-colors">新增故事卡片</span>
+          </button>
+        </div>
+      </div>
+      <div className="relative flex items-center justify-center w-12 h-12 shrink-0 order-1 md:order-2 my-8 md:my-0">
+        <div className="w-4 h-4 rounded-full bg-primary border-4 border-surface shadow-[0_0_15px_rgba(224,142,254,0.6)]" />
+      </div>
+      <div className="w-full md:w-1/2 md:pl-24 order-3">
+        <div className="text-on-surface-variant font-mono text-sm tracking-widest opacity-40">{marker}</div>
+      </div>
+    </div>
+  );
+}
+
 function TimelineCard({
   align,
   card,
@@ -1424,8 +1527,9 @@ function TimelineCard({
             src={cover}
           />
         </div>
-        <h3 className="text-2xl font-bold tracking-tight text-white mb-2">{card.title}</h3>
-        <p className="text-on-surface-variant text-sm line-clamp-3 leading-relaxed">{card.summary}</p>
+        <div className="absolute inset-x-6 top-6 h-16 rounded-full bg-white/5 blur-2xl opacity-60" />
+        <h3 className="text-[1.22rem] md:text-[1.3rem] font-bold tracking-tight text-white mb-2 relative">{card.title}</h3>
+        <p className="text-on-surface-variant text-sm leading-relaxed line-clamp-3">{card.summary}</p>
       </button>
     </div>
   );
@@ -2147,44 +2251,104 @@ function CardDetailOverlay({
   const videoUrl = card.mediaType === "video" ? toEmbeddableVideoUrl(card.mediaPathOrUrl) : null;
   const isNativeVideo = Boolean(videoUrl && (videoUrl.startsWith("/uploads/") || videoUrl.endsWith(".mp4") || videoUrl.endsWith(".webm") || videoUrl.endsWith(".mov")));
   const immersiveLayout = card.mediaType === "image";
+  const [videoActivated, setVideoActivated] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const detailCloseButtonClass =
+    "absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-on-surface-variant transition-all duration-300 active:scale-90 group aspect-square flex items-center justify-center w-10 h-10";
+  const detailTitleClass = "text-[1.68rem] md:text-[2rem] font-black tracking-tight text-white leading-[1.08]";
+  const detailOwnerActionsClass = "ml-auto mr-6 md:mr-8 flex items-center gap-2 shrink-0";
+  const detailEditButtonClass =
+    "flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 group active:scale-95";
+  const detailDeleteButtonClass =
+    "flex items-center gap-1 px-2 py-1 rounded-full bg-error/10 hover:bg-error/20 border border-error/20 transition-all duration-300 group active:scale-95";
+
+  useEffect(() => {
+    setVideoActivated(false);
+  }, [card.id, card.mediaPathOrUrl]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [card.id, card.mediaPathOrUrl]);
 
   if (immersiveLayout) {
     return (
-      <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-[20px] flex items-center justify-center p-4 md:p-8">
-        <div className="absolute inset-0 bg-surface-container-lowest overflow-hidden blur-[100px] opacity-30 scale-105 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-container/20 rounded-full mix-blend-screen blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-tertiary-container/20 rounded-full mix-blend-screen blur-[150px]" />
-        </div>
-        <main className="relative w-full max-w-4xl max-h-[85vh] overflow-hidden glass-panel ghost-border rounded-lg shadow-[0px_40px_100px_rgba(0,0,0,0.6),0px_0px_60px_rgba(224,142,254,0.08)] flex flex-col">
-          <div className="absolute top-4 right-4 z-50">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-on-surface-variant hover:text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all duration-300" onClick={onClose}>
-              <span className="material-symbols-outlined text-lg">close</span>
-            </button>
+      <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-[20px] flex items-center justify-center p-4 md:p-8">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-surface-container-lowest overflow-hidden blur-[100px] opacity-30 scale-105">
+            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-container/20 rounded-full mix-blend-screen blur-[150px]" />
+            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-tertiary-container/20 rounded-full mix-blend-screen blur-[150px]" />
           </div>
+          <div className="flex flex-col items-center justify-center h-full space-y-32 opacity-60">
+            <div className="w-[90%] h-px bg-outline-variant/20 relative">
+              <div className="absolute -top-4 left-[20%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20" />
+              <div className="absolute -top-6 left-[50%] w-16 h-16 rounded-full bg-tertiary/10 border border-tertiary/20" />
+              <div className="absolute -top-4 left-[80%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20" />
+            </div>
+          </div>
+        </div>
+        <main
+          className="glass-panel immersive-ghost-border relative w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-lg shadow-[0px_40px_100px_rgba(0,0,0,0.6),0px_0px_60px_rgba(224,142,254,0.08)] flex flex-col"
+          style={{ background: "rgba(14, 14, 14, 0.45)" }}
+        >
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-container/5 blur-[120px] pointer-events-none" />
+          <button
+            className={`${detailCloseButtonClass} z-50`}
+            onClick={onClose}
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
           <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12 h-full overflow-hidden">
             <div className="flex-shrink-0 w-full lg:w-[45%] h-64 lg:h-auto">
               <div className="relative w-full h-full group">
                 <div className="absolute -top-12 -left-12 w-48 h-48 nebula-glow opacity-50" />
                 <div className="absolute -bottom-12 -right-12 w-48 h-48 nebula-glow opacity-30" />
                 <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl">
-                  <img alt={card.title} className="w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000" src={images[0]} />
+                  <img
+                    alt={card.title}
+                    className="w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000"
+                    src={images[activeImageIndex] ?? images[0]}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  {images.length > 1 ? (
+                    <>
+                      <button
+                        aria-label="查看下一张图片"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/12 backdrop-blur-md text-white/72 hover:text-white hover:bg-white/18 transition-all duration-300 flex items-center justify-center shadow-[0_6px_20px_rgba(0,0,0,0.14)]"
+                        onClick={() => setActiveImageIndex((current) => (current === images.length - 1 ? 0 : current + 1))}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-2">
-              <div className="flex items-center gap-4 mb-4 flex-wrap">
+            <div className="flex-1 min-w-0 flex flex-col overflow-y-auto custom-scrollbar pr-2">
+              <div className="flex items-center mb-4 gap-3 flex-wrap">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary-dim bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                   {card.themeKey}
                 </span>
                 <span className="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/60">{formatEpochDate(card.createdAt)}</span>
+                {ownerAuthenticated ? (
+                  <div className={detailOwnerActionsClass}>
+                    <button className={detailEditButtonClass} onClick={onEdit}>
+                      <span className="material-symbols-outlined text-[14px] text-on-surface-variant group-hover:text-white">edit</span>
+                      <span className="text-[10px] font-bold tracking-wider text-on-surface-variant group-hover:text-white uppercase">编辑</span>
+                    </button>
+                    <button className={detailDeleteButtonClass} onClick={onDelete}>
+                      <span className="material-symbols-outlined text-[14px] text-error group-hover:text-error-dim">delete</span>
+                      <span className="text-[10px] font-bold tracking-wider text-error group-hover:text-error-dim uppercase">删除</span>
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-6 leading-tight">{card.title}</h1>
+              <h1 className={`${detailTitleClass} mb-6`}>{card.title}</h1>
 
               <div className="pl-4 border-l border-primary-dim/30 mb-8">
-                <p className="text-lg font-light text-on-surface-variant italic leading-relaxed">“{card.summary}”</p>
+                <p className="text-lg font-light italic leading-relaxed text-on-surface-variant">“{card.summary}”</p>
               </div>
 
               <section className="space-y-4">
@@ -2192,108 +2356,124 @@ function CardDetailOverlay({
                   <span className="w-1 h-1 rounded-full bg-primary/60" />
                   背后的故事
                 </h3>
-                <div className="space-y-4 text-on-surface-variant/90 leading-[1.7] font-normal text-sm md:text-base">
-                  {card.reflection.split("\n").map((paragraph) => (
+                <div className="space-y-4 text-sm md:text-base font-normal leading-[1.7] text-on-surface-variant/90">
+                  {splitReflectionParagraphs(card.reflection).map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
               </section>
 
-              {images.length > 1 ? (
-                <div className="grid grid-cols-3 gap-3 mt-8">
-                  {images.slice(1).map((image) => (
-                    <img key={image} alt={card.title} className="h-24 w-full rounded-2xl object-cover border border-white/5" src={image} />
-                  ))}
-                </div>
-              ) : null}
-
-              {ownerAuthenticated ? (
-                <div className="flex gap-3 pt-8">
-                  <button className="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-xs tracking-[0.25em] uppercase" onClick={onEdit}>
-                    编辑
-                  </button>
-                  <button className="px-5 py-3 rounded-full bg-[#fd6f85]/15 border border-[#fd6f85]/20 text-[#ffb0bd] text-xs tracking-[0.25em] uppercase" onClick={onDelete}>
-                    删除
-                  </button>
-                </div>
-              ) : null}
             </div>
           </div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary-container/5 rounded-full blur-[120px] pointer-events-none" />
         </main>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-[20px] flex items-center justify-center p-4 md:p-8">
-      <article className="glass-panel ghost-border w-full max-w-6xl max-h-[921px] rounded-xl overflow-hidden flex flex-col md:flex-row relative shadow-[0_20px_100px_rgba(0,0,0,0.8)]">
+    <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-[20px] flex items-center justify-center p-4 md:p-8">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-surface-container-lowest overflow-hidden blur-[100px] opacity-30 scale-105">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-container/20 rounded-full mix-blend-screen blur-[150px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-tertiary-container/20 rounded-full mix-blend-screen blur-[150px]" />
+        </div>
+        <div className="flex flex-col items-center justify-center h-full space-y-32 opacity-60">
+          <div className="w-[90%] h-px bg-outline-variant/20 relative">
+            <div className="absolute -top-4 left-[20%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20" />
+            <div className="absolute -top-6 left-[50%] w-16 h-16 rounded-full bg-tertiary/10 border border-tertiary/20" />
+            <div className="absolute -top-4 left-[80%] w-12 h-12 rounded-full bg-primary/10 border border-primary/20" />
+          </div>
+        </div>
+      </div>
+      <article
+        className="glass-panel immersive-ghost-border relative w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-lg shadow-[0px_40px_100px_rgba(0,0,0,0.6),0px_0px_60px_rgba(224,142,254,0.08)] flex flex-col"
+        style={{ background: "rgba(14, 14, 14, 0.45)" }}
+      >
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-container/5 blur-[120px] pointer-events-none" />
         <button
-          className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors"
+          className={`${detailCloseButtonClass} z-50`}
           onClick={onClose}
         >
-          <span className="material-symbols-outlined text-on-surface-variant text-lg">close</span>
+          <span className="material-symbols-outlined text-xl">close</span>
         </button>
 
-        <div className="w-full md:w-3/5 h-64 md:h-auto relative overflow-hidden group bg-black">
-          {isNativeVideo && videoUrl ? (
-            <video className="w-full h-full object-cover" loop muted playsInline autoPlay src={videoUrl} />
-          ) : videoUrl ? (
-            <iframe
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="w-full h-full"
-              src={videoUrl}
-              title={card.title}
-            />
-          ) : (
-            <img alt={card.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={getVideoPosterUrl(card.mediaPathOrUrl, card.title)} />
-          )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-surface/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-surface/40" />
-
-          {!videoUrl ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-primary-container/20 backdrop-blur-md flex items-center justify-center border border-primary-container/30">
-                <span className="material-symbols-outlined text-primary-container text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_arrow
-                </span>
+        <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12 h-full overflow-hidden">
+          <div className="flex-shrink-0 w-full lg:w-[45%] h-64 lg:h-auto">
+            <div className="relative w-full h-full group">
+              <div className="absolute -top-12 -left-12 w-48 h-48 nebula-glow opacity-50" />
+              <div className="absolute -bottom-12 -right-12 w-48 h-48 nebula-glow opacity-30" />
+              <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl bg-black">
+                {videoActivated && isNativeVideo && videoUrl ? (
+                  <video className="absolute inset-0 w-full h-full object-cover" controls autoPlay playsInline src={videoUrl} />
+                ) : videoActivated && videoUrl ? (
+                  <iframe
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                    src={withAutoplayVideoUrl(videoUrl)}
+                    title={card.title}
+                  />
+                ) : (
+                  <img
+                    alt={card.title}
+                    className="absolute inset-0 w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000"
+                    src={getVideoPosterUrl(card.mediaPathOrUrl, card.title)}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                {!videoActivated ? (
+                  <button
+                    className="absolute inset-0 flex items-center justify-center"
+                    onClick={() => setVideoActivated(true)}
+                    type="button"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-primary-container/20 backdrop-blur-md flex items-center justify-center border border-primary-container/30 hover:scale-105 transition-transform cursor-pointer">
+                      <span className="material-symbols-outlined text-primary-container text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        play_arrow
+                      </span>
+                    </div>
+                  </button>
+                ) : null}
               </div>
             </div>
-          ) : null}
-        </div>
+          </div>
 
-        <div className="w-full md:w-2/5 p-8 md:p-12 flex flex-col justify-center bg-surface-container/30 overflow-y-auto">
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase border border-tertiary/30 text-tertiary">Memory Node</span>
-                <span className="text-on-surface-variant font-['Plus_Jakarta_Sans'] text-xs tracking-widest uppercase">{formatReadableDate(card.createdAt)}</span>
-              </div>
-              <h1 className="text-[44px] leading-[0.95] md:text-[48px] font-extrabold tracking-tighter text-white mb-4">{card.title}</h1>
-              <p className="text-[15px] text-on-surface font-medium leading-relaxed italic">“{card.summary}”</p>
+          <div className="flex-1 min-w-0 flex flex-col overflow-y-auto custom-scrollbar pr-2">
+            <div className="flex items-center mb-4 gap-3 flex-wrap">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary-dim bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                {card.themeKey}
+              </span>
+              <span className="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/60">{formatEpochDate(card.createdAt)}</span>
+              {ownerAuthenticated ? (
+                <div className={detailOwnerActionsClass}>
+                  <button className={detailEditButtonClass} onClick={onEdit}>
+                    <span className="material-symbols-outlined text-[14px] text-on-surface-variant group-hover:text-white">edit</span>
+                    <span className="text-[10px] font-bold tracking-wider text-on-surface-variant group-hover:text-white uppercase">编辑</span>
+                  </button>
+                  <button className={detailDeleteButtonClass} onClick={onDelete}>
+                    <span className="material-symbols-outlined text-[14px] text-error group-hover:text-error-dim">delete</span>
+                    <span className="text-[10px] font-bold tracking-wider text-error group-hover:text-error-dim uppercase">删除</span>
+                  </button>
+                </div>
+              ) : null}
             </div>
-
-            <div className="space-y-4">
-              <h2 className="text-[10px] uppercase tracking-[0.3em] text-on-surface-variant font-bold">The Story Behind It</h2>
-              <div className="space-y-4 text-on-surface-variant text-[13px] leading-[1.75] font-light">
-                {card.reflection.split("\n").map((paragraph) => (
+            <h1 className={`${detailTitleClass} mb-6`}>{card.title}</h1>
+            <div className="pl-4 border-l border-primary-dim/30 mb-8">
+              <p className="text-lg font-light italic leading-relaxed text-on-surface-variant">“{card.summary}”</p>
+            </div>
+            <section className="space-y-4">
+              <h2 className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary/80 flex items-center gap-3">
+                <span className="w-1 h-1 rounded-full bg-primary/60" />
+                背后的故事
+              </h2>
+              <div className="space-y-4 text-sm md:text-base font-normal leading-[1.7] text-on-surface-variant/90">
+                {splitReflectionParagraphs(card.reflection).map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-            </div>
+            </section>
 
-            {ownerAuthenticated ? (
-              <div className="flex gap-3 pt-2">
-                <button className="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-xs tracking-[0.25em] uppercase" onClick={onEdit}>
-                  编辑
-                </button>
-                <button className="px-5 py-3 rounded-full bg-[#fd6f85]/15 border border-[#fd6f85]/20 text-[#ffb0bd] text-xs tracking-[0.25em] uppercase" onClick={onDelete}>
-                  删除
-                </button>
-              </div>
-            ) : null}
-          </div>
+            </div>
         </div>
       </article>
     </div>
@@ -2310,30 +2490,30 @@ function DeleteOverlay({
   onConfirm: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-xl p-4">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/55 backdrop-blur-[18px]">
       <div className="glass-panel relative w-full max-w-md rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
         <div className="h-1.5 w-full bg-gradient-to-r from-transparent via-error to-transparent opacity-50" />
-        <div className="flex flex-col items-center px-8 py-9 text-center">
-        <div className="w-16 h-16 rounded-full bg-error-container/20 flex items-center justify-center mb-6 border border-error/20">
-          <span className="material-symbols-outlined text-error text-3xl">delete_forever</span>
-        </div>
-        <h2 className="text-2xl font-bold tracking-tight text-on-surface mb-4">删除故事卡片？</h2>
-        <p className="text-on-surface-variant leading-relaxed mb-10 text-base px-2">确定要删除这段记忆吗？此操作无法撤销。</p>
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <button className="flex-1 px-8 py-3.5 rounded-full border border-outline-variant/30 bg-surface-container-highest text-on-surface font-semibold text-sm tracking-wider hover:bg-surface-bright transition-all duration-300 order-2 sm:order-1 active:scale-95" onClick={onCancel}>
-            取消
-          </button>
-          <button
-            className="flex-1 px-8 py-3.5 rounded-full bg-error text-on-error font-extrabold text-sm tracking-wider hover:shadow-[0_0_20px_rgba(253,111,133,0.4)] transition-all duration-300 order-1 sm:order-2 active:scale-95"
-            disabled={deleting}
-            onClick={onConfirm}
-          >
-            {deleting ? "删除中..." : "删除"}
-          </button>
-        </div>
-        </div>
-        <div className="h-16 w-full flex justify-center items-end pb-4 overflow-hidden pointer-events-none">
-          <div className="w-64 h-32 bg-error/5 blur-3xl rounded-full" />
+        <div className="px-8 pt-8 pb-10 flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-error-container/20 flex items-center justify-center mb-6 border border-error/20">
+            <span className="material-symbols-outlined text-error text-3xl">delete_forever</span>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight text-on-surface mb-4 font-headline">删除故事卡片？</h2>
+          <p className="text-on-surface-variant leading-relaxed mb-8 font-body text-base px-2">确定要删除这段记忆吗？此操作无法撤销。</p>
+          <div className="flex flex-col sm:flex-row sm:justify-center gap-4 w-full mt-4">
+            <button
+              className="w-full sm:w-[42%] py-3.5 px-8 rounded-full border border-outline-variant/20 bg-white/5 hover:bg-white/10 text-on-surface font-bold text-sm tracking-[0.18em] transition-all active:scale-95 order-2 sm:order-1"
+              onClick={onCancel}
+            >
+              取消
+            </button>
+            <button
+              className="w-full sm:w-[42%] py-3.5 px-8 rounded-full bg-error text-on-error font-bold text-sm tracking-[0.18em] hover:shadow-[0_0_20px_rgba(253,111,133,0.4)] transition-all duration-300 order-1 sm:order-2 active:scale-95"
+              disabled={deleting}
+              onClick={onConfirm}
+            >
+              {deleting ? "删除中..." : "删除"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

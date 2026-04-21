@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+BUNDLED_NODE_DIR="$ROOT_DIR/.tools/node-v24.15.0-darwin-arm64/bin"
+
+if [ -x "$BUNDLED_NODE_DIR/node" ]; then
+  PATH="$BUNDLED_NODE_DIR:$PATH"
+  export PATH
+fi
+
+exec npm run dev "$@"
