@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import stitchManifest from "../reference/stitch-manifest.json";
 import {
@@ -91,6 +91,50 @@ async function api<T>(input: string, init?: RequestInit): Promise<T> {
   }
 
   return payload as T;
+}
+
+function uploadFileWithProgress(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<{ path: string; mimeType: string }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    formData.append("file", file);
+    xhr.open("POST", "/api/upload");
+    xhr.withCredentials = true;
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable) {
+        return;
+      }
+
+      const nextProgress = Math.min(99, Math.max(1, Math.round((event.loaded / event.total) * 100)));
+      onProgress?.(nextProgress);
+    });
+
+    xhr.addEventListener("load", () => {
+      const contentType = xhr.getResponseHeader("content-type") ?? "";
+      const payload = contentType.includes("application/json") ? JSON.parse(xhr.responseText) : xhr.responseText;
+
+      if (xhr.status < 200 || xhr.status >= 300) {
+        const message =
+          typeof payload === "object" && payload && "message" in payload ? String(payload.message) : "请求失败，请稍后重试。";
+        reject(new Error(message));
+        return;
+      }
+
+      onProgress?.(100);
+      resolve(payload as { path: string; mimeType: string });
+    });
+
+    xhr.addEventListener("error", () => {
+      reject(new Error("上传失败，请稍后重试。"));
+    });
+
+    xhr.send(formData);
+  });
 }
 
 function formatDate(value: string | Date) {
@@ -2533,12 +2577,71 @@ function CardEditorOverlay({
 }) {
   const [localDraft, setLocalDraft] = useState(draft);
   const [uploading, setUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [videoUploadPreviewUrl, setVideoUploadPreviewUrl] = useState<string | null>(null);
   const [videoUrlInput, setVideoUrlInput] = useState(draft.videoPath);
+  const overlayScrollRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [videoAnchorTop, setVideoAnchorTop] = useState<number | null>(null);
+  const isVideoMode = localDraft.mediaType === "video";
+
+  function replaceVideoUploadPreview(next: string | null) {
+    setVideoUploadPreviewUrl((current) => {
+      if (current && current !== next && current.startsWith("blob:")) {
+        URL.revokeObjectURL(current);
+      }
+
+      return next;
+    });
+  }
 
   useEffect(() => {
     setLocalDraft(draft);
     setVideoUrlInput(draft.videoPath);
+    setVideoUploading(false);
+    setVideoUploadProgress(0);
+    replaceVideoUploadPreview(null);
   }, [draft]);
+
+  useEffect(() => {
+    overlayScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [localDraft.mediaType]);
+
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (videoUploadPreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(videoUploadPreviewUrl);
+      }
+    };
+  }, [videoUploadPreviewUrl]);
+
+  useLayoutEffect(() => {
+    if (!isVideoMode || videoAnchorTop === null || !formRef.current || !overlayScrollRef.current) {
+      return;
+    }
+
+    const currentTop = formRef.current.getBoundingClientRect().top;
+    const delta = currentTop - videoAnchorTop;
+
+    if (Math.abs(delta) > 1) {
+      overlayScrollRef.current.scrollTop += delta;
+    }
+  }, [isVideoMode, videoAnchorTop]);
 
   function confirmClose() {
     if (
@@ -2556,40 +2659,95 @@ function CardEditorOverlay({
     onClose();
   }
 
+  function switchMediaType(nextMediaType: "image" | "video") {
+    if (nextMediaType === localDraft.mediaType) {
+      return;
+    }
+
+    if (nextMediaType === "video") {
+      const measuredTop = formRef.current?.getBoundingClientRect().top;
+      if (typeof measuredTop === "number") {
+        setVideoAnchorTop(Math.max(8, Math.round(measuredTop)));
+      }
+
+      setLocalDraft((current) => ({
+        ...current,
+        mediaType: "video",
+        imagePaths: []
+      }));
+      return;
+    }
+
+    setLocalDraft((current) => ({
+      ...current,
+      mediaType: "image",
+      videoPath: ""
+    }));
+    setVideoUploading(false);
+    setVideoUploadProgress(0);
+    replaceVideoUploadPreview(null);
+    setVideoUrlInput("");
+  }
+
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) {
       return;
     }
 
-    setUploading(true);
+    if (localDraft.mediaType === "image") {
+      setUploading(true);
 
-    try {
-      const uploaded: string[] = [];
+      try {
+        const uploaded: string[] = [];
 
-      for (const file of Array.from(files)) {
-        const formData = new FormData();
-        formData.append("file", file);
-        const result = await api<{ path: string }>("/api/upload", {
-          method: "POST",
-          body: formData
-        });
-        uploaded.push(result.path);
-      }
+        for (const file of Array.from(files)) {
+          const formData = new FormData();
+          formData.append("file", file);
+          const result = await api<{ path: string }>("/api/upload", {
+            method: "POST",
+            body: formData
+          });
+          uploaded.push(result.path);
+        }
 
-      if (localDraft.mediaType === "image") {
         setLocalDraft((current) => ({
           ...current,
           imagePaths: [...current.imagePaths, ...uploaded].slice(0, 3)
         }));
-      } else if (uploaded[0]) {
-        setLocalDraft((current) => ({
-          ...current,
-          videoPath: uploaded[0]
-        }));
-        setVideoUrlInput(uploaded[0]);
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : "图片上传失败，请稍后重试。");
+      } finally {
+        setUploading(false);
       }
+
+      return;
+    }
+
+    const file = files[0];
+    const localPreviewUrl = URL.createObjectURL(file);
+    replaceVideoUploadPreview(localPreviewUrl);
+    setVideoUploading(true);
+    setVideoUploadProgress(0);
+
+    try {
+      const result = await uploadFileWithProgress(file, setVideoUploadProgress);
+
+      setLocalDraft((current) => ({
+        ...current,
+        videoPath: result.path
+      }));
+      setVideoUrlInput("");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "视频上传失败，请稍后重试。");
+      setLocalDraft((current) => ({
+        ...current,
+        videoPath: ""
+      }));
+      setVideoUrlInput("");
     } finally {
-      setUploading(false);
+      setVideoUploading(false);
+      setVideoUploadProgress(0);
+      replaceVideoUploadPreview(null);
     }
   }
 
@@ -2613,85 +2771,143 @@ function CardEditorOverlay({
   }
 
   const videoPreview = toEmbeddableVideoUrl(localDraft.videoPath);
+  const activeVideoPreview = videoUploading ? videoUploadPreviewUrl : videoPreview;
+  const isVideoLinkConfirmed = Boolean(videoPreview && videoUrlInput.trim() && videoUrlInput.trim() === localDraft.videoPath.trim());
+  const selectChevron =
+    "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a9a7a7' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")";
+  const fieldLabelClass = "mb-3 block text-xs font-bold uppercase tracking-widest text-on-surface-variant";
+  const elevatedContentTextClass = "text-[rgba(236,232,239,0.9)]";
+  const panelFieldSurfaceClass =
+    "w-full rounded border border-outline-variant/10 bg-[rgba(25,25,25,0.955)] backdrop-blur-md outline-none transition-all focus:border-primary/50 focus:ring-0";
+  const deepFieldSurfaceClass =
+    "w-full rounded border border-outline-variant/10 bg-[rgba(25,25,25,0.955)] backdrop-blur-md outline-none transition-all";
+  const selectFieldClass =
+    `${panelFieldSurfaceClass} ${elevatedContentTextClass} relative z-10 cursor-pointer appearance-none px-4 py-3.5 text-sm`;
+  const textFieldClass =
+    `${deepFieldSurfaceClass} ${elevatedContentTextClass} px-5 py-4 text-lg font-bold tracking-tight placeholder:text-surface-container-highest focus:border-primary/50 focus:shadow-[0_0_20px_rgba(224,142,254,0.1)]`;
+  const summaryFieldClass =
+    `${deepFieldSurfaceClass} ${elevatedContentTextClass} resize-none px-5 py-4 text-sm italic placeholder:text-on-surface-variant/30 placeholder:opacity-100 focus:border-primary-container/40 focus:ring-0 focus:shadow-[0_0_20px_rgba(224,142,254,0.1)]`;
+  const reflectionFieldClass =
+    `${deepFieldSurfaceClass} ${elevatedContentTextClass} resize-none px-5 py-4 text-sm leading-relaxed placeholder:text-on-surface-variant/30 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_20px_rgba(129,236,255,0.1)]`;
+  const uploadHintIndex = Math.min(localDraft.imagePaths.length, 2);
+  const isLocalVideoSource = (value: string) =>
+    value.startsWith("/uploads/") || value.endsWith(".mp4") || value.endsWith(".webm") || value.endsWith(".mov");
 
   return (
-    <div className="fixed inset-0 z-[115] bg-black/70 backdrop-blur-[24px] overflow-auto p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <form className="glass-panel border border-white/5 rounded-[32px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.55)]" onSubmit={submit}>
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-0">
-            <div className="p-8 md:p-10 space-y-8">
+    <div className="fixed inset-0 z-[115] overflow-hidden">
+      <div className="fixed inset-0 bg-surface-container-lowest/52 backdrop-blur-[28px] [backdrop-filter:blur(28px)_saturate(0.55)_brightness(0.6)]" />
+      <div
+        ref={overlayScrollRef}
+        className={`absolute inset-0 ${
+          isVideoMode ? "overflow-y-auto overscroll-contain" : "overflow-hidden overscroll-none"
+        }`}
+      >
+        <div
+          className={
+            isVideoMode
+              ? "flex min-h-full w-full items-start justify-center px-4 pb-4 md:px-8 md:pb-8"
+              : "flex min-h-full w-full items-center justify-center p-4 md:p-8"
+          }
+          style={isVideoMode ? { paddingTop: `${videoAnchorTop ?? 24}px` } : undefined}
+        >
+          <div className="relative mx-auto w-full max-w-5xl">
+            <form
+              ref={formRef}
+              className={`glass-panel relative flex w-full flex-col rounded-xl border border-[rgba(224,142,254,0.16)] shadow-2xl md:flex-row ${
+                isVideoMode
+                  ? "overflow-hidden"
+                  : "max-h-[calc(100vh-2rem)] min-h-0 overflow-hidden md:max-h-[calc(100vh-4rem)]"
+              }`}
+              onSubmit={submit}
+            >
+          <div className={`w-full border-b border-outline-variant/10 p-8 md:w-5/12 md:border-b-0 md:border-r md:p-12 ${isVideoMode ? "overflow-visible" : "min-h-0 overflow-hidden"}`}>
+            <div className="space-y-10">
               <header>
-                <div className="text-xs uppercase tracking-[0.3em] text-tertiary font-bold mb-2 block">故事架构师</div>
-                <h2 className="text-3xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-primary-dim">编辑故事卡片</h2>
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.3em] text-tertiary">故事架构师</span>
+                <h2 className="bg-gradient-to-r from-primary-container to-primary-dim bg-clip-text text-3xl font-extrabold leading-tight tracking-tight text-transparent">
+                  编辑故事卡片
+                </h2>
               </header>
 
-              <label className="block">
-                <div className="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block">卡片主题</div>
-                {localDraft.mode === "create" ? (
-                  <select
-                    className="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 rounded py-3.5 px-4 appearance-none text-on-surface focus:ring-0 focus:border-primary/50 transition-all cursor-pointer text-sm"
-                    onChange={(event) => setLocalDraft((current) => ({ ...current, themeKey: event.target.value }))}
-                    value={localDraft.themeKey}
-                  >
-                    {LEVEL_THEMES[localDraft.levelId].map((theme) => (
-                      <option key={theme} value={theme}>
-                        {theme}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 rounded py-3.5 px-4 text-sm">
-                    {localDraft.themeKey}
-                  </div>
-                )}
-              </label>
-
-              <label className="block">
-                <div className="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block">故事标题</div>
-                <input
-                  className="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-primary/50 text-xl font-bold tracking-tight text-on-surface placeholder:text-surface-container-highest px-5 py-4 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(224,142,254,0.1)] rounded"
-                  onChange={(event) => setLocalDraft((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="输入节点名称..."
-                  value={localDraft.title}
-                />
-              </label>
-
-              <label className="block">
-                <div className="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block">故事精华</div>
-                <textarea
-                  className="w-full bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/10 focus:border-tertiary/50 text-on-secondary-container italic py-4 px-5 focus:ring-0 transition-all outline-none focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] resize-none rounded text-sm"
-                  onChange={(event) => setLocalDraft((current) => ({ ...current, summary: event.target.value }))}
-                  placeholder="一句话描述这个故事..."
-                  rows={4}
-                  value={localDraft.summary}
-                />
-              </label>
-            </div>
-
-            <div className="border-t lg:border-t-0 lg:border-l border-white/5 p-8 md:p-10 bg-white/[0.02] flex flex-col">
-              <div className="space-y-10 flex-grow">
+              <div className="space-y-8">
                 <label className="block">
-                  <div className="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-3 block">故事细节与感悟</div>
-                  <textarea
-                    className="w-full bg-surface-container-low/40 backdrop-blur-md rounded border border-outline-variant/10 px-5 py-4 text-on-surface-variant leading-relaxed focus:ring-0 focus:border-tertiary/50 outline-none transition-all resize-none placeholder:text-on-surface-variant/30 focus:shadow-[0_0_20px_rgba(129,236,255,0.1)] text-sm min-h-40"
-                    onChange={(event) => setLocalDraft((current) => ({ ...current, reflection: event.target.value }))}
-                    placeholder="描述故事有趣的细节和个人反思..."
-                    rows={7}
-                    value={localDraft.reflection}
+                  <div className={fieldLabelClass}>卡片主题</div>
+                  {localDraft.mode === "create" ? (
+                    <div className="relative">
+                      <select
+                        className={selectFieldClass}
+                        onChange={(event) => setLocalDraft((current) => ({ ...current, themeKey: event.target.value }))}
+                        style={{
+                          backgroundImage: selectChevron,
+                          backgroundPosition: "right 1rem center",
+                          backgroundRepeat: "no-repeat",
+                          backgroundSize: "1.25em 1.25em"
+                        }}
+                        value={localDraft.themeKey}
+                      >
+                        {LEVEL_THEMES[localDraft.levelId].map((theme) => (
+                          <option key={theme} value={theme}>
+                            {theme}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className={`w-full rounded border border-outline-variant/10 bg-[rgba(25,25,25,0.955)] backdrop-blur-md px-4 py-3.5 text-sm ${elevatedContentTextClass}`}>
+                      {localDraft.themeKey}
+                    </div>
+                  )}
+                </label>
+
+                <label className="block">
+                  <div className={fieldLabelClass}>故事标题</div>
+                  <input
+                    className={textFieldClass}
+                    onChange={(event) => setLocalDraft((current) => ({ ...current, title: event.target.value }))}
+                    placeholder="输入故事标题..."
+                    value={localDraft.title}
                   />
                 </label>
 
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">媒体上传</label>
-                    <div className="flex bg-surface-container-high p-1 rounded-full ghost-border">
+                <label className="block">
+                  <div className={fieldLabelClass}>故事精华</div>
+                  <textarea
+                    className={summaryFieldClass}
+                    onChange={(event) => setLocalDraft((current) => ({ ...current, summary: event.target.value }))}
+                    placeholder="一句话描述这个故事..."
+                    rows={3}
+                    value={localDraft.summary}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className={`flex w-full flex-col bg-white/[0.02] p-8 md:w-7/12 md:p-12 ${isVideoMode ? "" : "min-h-0"}`}>
+            <div className={isVideoMode ? "" : "min-h-0 flex-1 overflow-hidden pr-1"}>
+              <div className="space-y-10">
+              <label className="block">
+                <div className={fieldLabelClass}>故事细节与感悟</div>
+                <textarea
+                  className={reflectionFieldClass}
+                  onChange={(event) => setLocalDraft((current) => ({ ...current, reflection: event.target.value }))}
+                  placeholder="描述故事有趣的细节和个人反思..."
+                  rows={4}
+                  value={localDraft.reflection}
+                />
+              </label>
+
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">媒体上传</label>
+                  <div className="flex bg-surface-container-high p-1 rounded-full ghost-border">
                       <button
                         className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${
                           localDraft.mediaType === "image"
                             ? "bg-gradient-to-br from-primary-container to-primary-dim text-on-primary shadow-lg"
                             : "text-on-surface-variant hover:text-on-surface transition-colors"
                         }`}
-                        onClick={() => setLocalDraft((current) => ({ ...current, mediaType: "image", videoPath: "" }))}
+                        onClick={() => switchMediaType("image")}
                         type="button"
                       >
                         图片
@@ -2702,202 +2918,250 @@ function CardEditorOverlay({
                             ? "bg-gradient-to-br from-primary-container to-primary-dim text-on-primary shadow-lg"
                             : "text-on-surface-variant hover:text-on-surface transition-colors"
                         }`}
-                        onClick={() => setLocalDraft((current) => ({ ...current, mediaType: "video", imagePaths: [] }))}
+                        onClick={() => switchMediaType("video")}
                         type="button"
                       >
                         视频
                       </button>
-                    </div>
                   </div>
+                </div>
 
-                  {localDraft.mediaType === "image" ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                          {Array.from({ length: 3 }).map((_, index) => {
-                            const image = localDraft.imagePaths[index];
-                            return image ? (
-                              <div className="group relative rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/20 hover:border-primary-container/50 transition-all shadow-xl aspect-[4/4.5]" key={image}>
-                                <img alt="preview" className="w-full h-full object-cover" src={image} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-bold text-primary-container uppercase tracking-widest text-[10px]">{index === 0 ? "主图" : ""}</span>
-                                    <button
-                                      className="material-symbols-outlined text-error-dim hover:text-error"
-                                      onClick={() =>
-                                        setLocalDraft((current) => ({
-                                          ...current,
-                                          imagePaths: current.imagePaths.filter((item) => item !== image)
-                                        }))
-                                      }
-                                      type="button"
-                                    >
-                                      delete
-                                    </button>
-                                  </div>
-                                </div>
-                                {index === 0 ? (
-                                  <div className="absolute top-3 right-3 bg-primary-container/90 text-on-primary-container rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
-                                    <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                      check_circle
-                                    </span>
-                                  </div>
-                                ) : null}
-                              </div>
-                            ) : (
-                              <label
-                                className="group rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-tertiary/50 hover:bg-tertiary/5 transition-all flex flex-col items-center justify-center p-6 aspect-[4/4.5] gap-3"
-                                key={index}
+                {localDraft.mediaType === "image" ? (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, index) => {
+                      const image = localDraft.imagePaths[index];
+                      return image ? (
+                        <div className="group relative aspect-[4/4.5] overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high shadow-xl transition-all hover:border-primary-container/50" key={image}>
+                          <img alt="preview" className="h-full w-full object-cover" src={image} />
+                          <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-primary-container">{index === 0 ? "主图" : ""}</span>
+                              <button
+                                className="text-white/70 transition-colors hover:text-error"
+                                onClick={() =>
+                                  setLocalDraft((current) => ({
+                                    ...current,
+                                    imagePaths: current.imagePaths.filter((item) => item !== image)
+                                  }))
+                                }
+                                type="button"
                               >
-                                {uploading && index === localDraft.imagePaths.length ? (
-                                  <div className="relative rounded-xl overflow-hidden bg-surface-container-high border border-primary-container/30 flex flex-col items-center justify-center p-6 text-center aspect-[4/4.5] w-full">
-                                    <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-primary-container/20 to-tertiary/10" />
-                                    <div className="z-10 w-full flex flex-col items-center">
-                                      <div className="w-12 h-12 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center mb-4 animate-pulse">
-                                        <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                          cloud_upload
-                                        </span>
-                                      </div>
-                                      <p className="uppercase tracking-widest font-bold text-primary mb-1 text-xs">正在上传</p>
-                                      <p className="text-on-surface-variant mb-6 text-[11px]">素材处理中</p>
-                                      <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden shadow-inner">
-                                        <div className="h-full w-[65%] bg-gradient-to-r from-primary-container to-tertiary shadow-[0_0_10px_rgba(224,142,254,0.6)]" />
-                                      </div>
-                                      <p className="font-bold text-on-surface-variant mt-2 text-[11px]">65%</p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center group-hover:scale-110 transition-transform">
-                                      <span className="material-symbols-outlined text-outline group-hover:text-tertiary text-2xl">add</span>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                      <p className="text-neutral-500 uppercase font-medium text-[10px] tracking-[0.15em] opacity-80">最大限制 24MB</p>
-                                    </div>
-                                  </>
-                                )}
-                                <input accept="image/*" className="hidden" multiple onChange={(event) => void uploadFiles(event.target.files)} type="file" />
-                              </label>
-                            );
-                          })}
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="rounded-[28px] border border-white/5 bg-white/[0.03] p-6">
-                        <div className="relative aspect-video overflow-hidden group border bg-black border-white/10 rounded-lg">
-                          {videoPreview ? (
-                            videoPreview.startsWith("/uploads/") || videoPreview.endsWith(".mp4") || videoPreview.endsWith(".webm") || videoPreview.endsWith(".mov") ? (
-                              <>
-                                <video className="h-full w-full object-cover opacity-60" loop muted playsInline autoPlay src={videoPreview} />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/40 backdrop-blur-sm">
-                                  <div className="relative mb-4 w-16 h-16">
-                                    <div className="absolute inset-0 rounded-full border-2 border-tertiary/20 border-t-tertiary animate-[spin_3s_linear_infinite]" />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <span className="material-symbols-outlined text-xl text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                        videocam
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <h3 className="text-xl font-headline font-bold text-white tracking-tight">
-                                    <span className="text-sm font-medium tracking-wider text-white/90">已完成 74% ...</span>
-                                  </h3>
-                                  <p className="text-[11px] text-on-surface-variant max-w-[280px] text-center mt-2 leading-relaxed">正在上传视频，素材处理中</p>
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <label
+                          className="group flex aspect-[4/4.5] flex-col items-center justify-center gap-3 rounded-xl border-[1.5px] border-dashed border-outline-variant/30 bg-[rgba(25,25,25,0.955)] p-6 transition-all hover:border-tertiary/50 hover:bg-tertiary/5"
+                          key={index}
+                        >
+                          {uploading && index === localDraft.imagePaths.length ? (
+                            <div className="relative flex aspect-[4/4.5] w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-primary-container/30 bg-surface-container-high p-6 text-center">
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary-container/20 to-tertiary/10 opacity-20 pointer-events-none" />
+                              <div className="z-10 flex w-full flex-col items-center">
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-primary-container/40 bg-primary-container/20 animate-pulse">
+                                  <span className="material-symbols-outlined text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                    cloud_upload
+                                  </span>
                                 </div>
-                                <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between z-20">
-                                  <div className="flex flex-col">
-                                    <div className="flex items-center gap-3">
-                                      <span className="bg-primary-container/20 text-primary-container text-[9px] px-2 py-0.5 rounded-full border border-primary-container/30 font-bold tracking-widest uppercase">
-                                        实时预览
-                                      </span>
-                                      <div className="flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-[12px] text-neutral-400">schedule</span>
-                                        <span className="text-[10px] text-neutral-400 font-bold tracking-tighter uppercase align-baseline">0:24</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <button className="w-7 h-7 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-error cursor-pointer transition-all hover:scale-110" type="button">
-                                      <span className="material-symbols-outlined text-sm">delete</span>
-                                    </button>
-                                    <button className="w-7 h-7 rounded-full glass-panel border border-white/10 flex items-center justify-center text-white/70 hover:text-tertiary cursor-pointer transition-all hover:scale-110" type="button">
-                                      <span className="material-symbols-outlined text-sm">fullscreen</span>
-                                    </button>
-                                  </div>
+                                <p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">正在上传</p>
+                                <p className="mb-6 text-[11px] text-on-surface-variant">素材处理中</p>
+                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-highest shadow-inner">
+                                  <div className="h-full w-[65%] bg-gradient-to-r from-primary-container to-tertiary shadow-[0_0_10px_rgba(224,142,254,0.6)]" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-20 overflow-hidden">
-                                  <div className="h-full bg-gradient-to-r from-primary-container to-tertiary w-3/4 shadow-[0_0_10px_#81ecff]" />
-                                </div>
-                              </>
-                            ) : (
-                              <iframe
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowFullScreen
-                                className="w-full h-full"
-                                src={videoPreview}
-                                title="Video preview"
-                              />
-                            )
-                          ) : (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-container-low/20 backdrop-blur-sm border-2 border-dashed border-outline-variant/30 rounded-lg group-hover:border-tertiary/40 transition-colors">
-                              <div className="mb-4 flex flex-col items-center gap-4">
-                                <span className="material-symbols-outlined text-5xl text-on-surface-variant/40" style={{ fontVariationSettings: "'wght' 200" }}>
-                                  upload_file
-                                </span>
-                                <div className="text-center">
-                                  <h3 className="font-headline font-bold text-on-surface tracking-tight text-base">上传视频素材</h3>
-                                  <p className="text-[11px] text-on-surface-variant mt-1 uppercase tracking-widest">支持 MP4, WEBM 或 MOV，最大 50MB</p>
-                                </div>
+                                <p className="mt-2 text-[11px] font-bold text-on-surface-variant">65%</p>
                               </div>
-                              <label className="mt-4 px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-on-surface transition-all active:scale-95 cursor-pointer">
-                                浏览文件
-                                <input accept="video/*" className="hidden" onChange={(event) => void uploadFiles(event.target.files)} type="file" />
-                              </label>
+                            </div>
+                          ) : (
+                            <div className="flex translate-y-3 flex-col items-center">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-high transition-transform group-hover:scale-110">
+                                <span className="material-symbols-outlined text-2xl text-outline transition-colors group-hover:text-tertiary">
+                                  add
+                                </span>
+                              </div>
+                              <div className="mt-2 flex min-h-[28px] flex-col items-center justify-start">
+                                {index === uploadHintIndex ? (
+                                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500 opacity-80">最大限制 24MB</p>
+                                ) : (
+                                  <p className="invisible text-[10px] font-medium uppercase tracking-[0.15em]" aria-hidden="true">
+                                    最大限制 24MB
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           )}
-                        </div>
-                      </div>
-
-                      <div className="rounded-[28px] border border-white/5 bg-white/[0.03] p-6 space-y-4">
-                        <div className="group mt-6 flex items-center relative">
-                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                            <span className="material-symbols-outlined text-xl text-tertiary/70">link</span>
+                          <input accept="image/*" className="hidden" multiple onChange={(event) => void uploadFiles(event.target.files)} type="file" />
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {videoUploading && videoUploadPreviewUrl ? (
+                      <div className="relative aspect-video overflow-hidden rounded-[28px] border border-white/10 bg-black">
+                        <video className="h-full w-full object-cover opacity-60" loop muted playsInline autoPlay src={videoUploadPreviewUrl} />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/40 backdrop-blur-sm">
+                          <div className="relative mb-4 h-16 w-16">
+                            <div className="absolute inset-0 animate-[spin_3s_linear_infinite] rounded-full border-2 border-tertiary/20 border-t-tertiary" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-xl text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                videocam
+                              </span>
+                            </div>
                           </div>
-                          <input
-                            className="w-full rounded-full border bg-surface-container-low/40 backdrop-blur-md py-4 pl-14 pr-12 text-sm italic text-on-surface placeholder:text-outline-variant/40 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_25px_rgba(129,236,255,0.1)] transition-all outline-none font-mono border-outline-variant/40 border-2"
-                            onChange={(event) => {
-                              setVideoUrlInput(event.target.value);
-                              setLocalDraft((current) => ({ ...current, videoPath: event.target.value }));
-                            }}
-                            placeholder={videoPreview ? "资源链接..." : "或粘贴视频链接"}
-                            value={videoUrlInput}
+                          <h3 className="text-xl font-headline font-bold tracking-tight text-white">已完成 {videoUploadProgress}% ...</h3>
+                          <p className="mt-2 max-w-[280px] text-center text-[11px] leading-relaxed text-on-surface-variant">正在上传视频，素材处理中</p>
+                        </div>
+                        <button
+                          className="absolute bottom-16 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full glass-panel border border-white/10 text-white/70 shadow-[0_10px_25px_rgba(0,0,0,0.28)] transition-all hover:scale-105 hover:text-error"
+                          onClick={() => {
+                            setVideoUploading(false);
+                            replaceVideoUploadPreview(null);
+                            setLocalDraft((current) => ({
+                              ...current,
+                              videoPath: ""
+                            }));
+                            setVideoUrlInput("");
+                          }}
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                        <div className="absolute bottom-0 left-0 z-20 h-1 w-full overflow-hidden bg-white/10">
+                          <div
+                            className="h-full bg-gradient-to-r from-primary-container to-tertiary shadow-[0_0_10px_#81ecff]"
+                            style={{ width: `${Math.max(videoUploadProgress, 2)}%` }}
                           />
-                          <button className="absolute right-4 text-neutral-500 hover:text-primary transition-colors flex items-center justify-center p-1" type="button">
-                            {videoPreview ? (
-                              <span className="material-symbols-outlined text-xl">check</span>
-                            ) : (
-                              <span className="text-[10px] font-black tracking-widest uppercase px-2 opacity-40">确认</span>
-                            )}
-                          </button>
                         </div>
                       </div>
+                    ) : activeVideoPreview ? (
+                      <div className="relative aspect-video overflow-hidden rounded-[28px] border border-white/10 bg-black">
+                        {isLocalVideoSource(activeVideoPreview) ? (
+                          <video className="h-full w-full object-cover" controls muted playsInline src={activeVideoPreview} />
+                        ) : (
+                          <iframe
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            className="h-full w-full"
+                            src={withAutoplayVideoUrl(activeVideoPreview)}
+                            title="Video preview"
+                          />
+                        )}
+                        <button
+                          className="absolute bottom-16 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full glass-panel border border-white/10 text-white/70 shadow-[0_10px_25px_rgba(0,0,0,0.28)] transition-all hover:scale-105 hover:text-error"
+                          onClick={() => {
+                            setLocalDraft((current) => ({
+                              ...current,
+                              videoPath: ""
+                            }));
+                            setVideoUrlInput("");
+                          }}
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="group flex aspect-video flex-col items-center justify-center rounded-[28px] border-[1.5px] border-dashed border-outline-variant/30 bg-[rgba(25,25,25,0.955)] px-8 py-10 transition-colors hover:border-tertiary/40">
+                        <div className="mb-4 flex flex-col items-center gap-4 text-center">
+                          <span className="material-symbols-outlined text-5xl text-on-surface-variant/40" style={{ fontVariationSettings: "'wght' 200" }}>
+                            upload_file
+                          </span>
+                          <div className="text-center">
+                            <h3 className={`font-headline text-base font-bold tracking-tight ${elevatedContentTextClass}`}>上传视频素材</h3>
+                            <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500 opacity-80">支持 MP4, WEBM 或 MOV，最大 500MB</p>
+                          </div>
+                        </div>
+                        <button
+                          className={`mt-4 rounded-full border border-white/10 bg-white/5 px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${elevatedContentTextClass} transition-all active:scale-95 group-hover:bg-white/10`}
+                          onClick={() => videoFileInputRef.current?.click()}
+                          type="button"
+                        >
+                          浏览文件
+                        </button>
+                        <input
+                          accept="video/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            void uploadFiles(event.target.files);
+                            event.currentTarget.value = "";
+                          }}
+                          onClick={(event) => {
+                            event.currentTarget.value = "";
+                          }}
+                          ref={videoFileInputRef}
+                          type="file"
+                        />
+                      </div>
+                    )}
+
+                    <div className="group mt-6 flex items-center relative">
+                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <span className="material-symbols-outlined text-xl text-tertiary/70">link</span>
+                      </div>
+                      <input
+                        className="w-full rounded-full border border-outline-variant/40 bg-surface-container-low/40 backdrop-blur-md py-4 pl-14 pr-12 text-sm italic text-on-surface placeholder:text-outline-variant/40 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_25px_rgba(129,236,255,0.1)] transition-all outline-none font-mono"
+                        onChange={(event) => setVideoUrlInput(event.target.value)}
+                        placeholder="或粘贴视频链接"
+                        value={videoUrlInput}
+                      />
+                      <button
+                        className={`absolute right-4 flex items-center justify-center p-1 transition-colors ${
+                          isVideoLinkConfirmed ? "text-neutral-500 hover:text-primary" : "text-on-surface-variant hover:text-primary"
+                        }`}
+                        onClick={() => {
+                          const nextValue = videoUrlInput.trim();
+
+                          if (!nextValue) {
+                            return;
+                          }
+
+                          if (!toEmbeddableVideoUrl(nextValue)) {
+                            window.alert("请输入可嵌入的视频链接，或先上传短视频。");
+                            return;
+                          }
+
+                          setLocalDraft((current) => ({
+                            ...current,
+                            videoPath: nextValue
+                          }));
+                        }}
+                        type="button"
+                      >
+                        {isVideoLinkConfirmed ? (
+                          <span className="material-symbols-outlined text-xl">check</span>
+                        ) : (
+                          <span className="px-2 text-[11px] font-black uppercase tracking-widest opacity-40">确认</span>
+                        )}
+                      </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+            </div>
 
-          <div className="px-8 py-6 border-t border-white/5 flex items-center justify-end gap-6">
-            <button className="font-black uppercase tracking-widest text-on-surface-variant hover:text-error transition-colors text-sm" onClick={confirmClose} type="button">
-              取消
-            </button>
-            <button
-              className="bg-gradient-to-br from-primary-container to-primary-dim text-on-primary px-8 py-4 rounded-full font-black text-sm uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(224,142,254,0.3)] hover:shadow-[0_0_30px_rgba(129,236,255,0.4)] transition-all transform active:scale-95"
-              disabled={saving}
-              type="submit"
-            >
-              {saving ? "保存中..." : "保存故事"}
-            </button>
+            <div className={`mt-9 flex items-center justify-end gap-3 md:mt-11 ${isVideoMode ? "" : "shrink-0"}`}>
+              <button
+                className={`px-4 py-3 rounded-full ${elevatedContentTextClass} font-bold hover:text-on-surface transition-all duration-300 text-sm tracking-[0.18em] uppercase`}
+                onClick={confirmClose}
+                type="button"
+              >
+                取消
+              </button>
+              <button
+                className="bg-gradient-to-br from-primary-container to-primary-dim text-on-primary px-7 py-3.5 rounded-full font-black text-sm uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(224,142,254,0.3)] hover:shadow-[0_0_30px_rgba(129,236,255,0.4)] transition-all transform active:scale-95"
+                disabled={saving}
+                type="submit"
+              >
+                {saving ? "保存中..." : "保存故事"}
+              </button>
+            </div>
           </div>
-        </form>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

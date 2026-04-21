@@ -63,7 +63,11 @@ app.register(cookie, {
   secret: config.cookieSecret
 });
 
-app.register(multipart);
+app.register(multipart, {
+  limits: {
+    fileSize: 500 * 1024 * 1024
+  }
+});
 app.register(fastifyStatic, {
   root: config.uploadDir,
   prefix: "/uploads/"
