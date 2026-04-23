@@ -173,12 +173,16 @@ function parseImagePaths(card: StoryCardDto) {
   }
 }
 
+function isNativeVideoUrl(value: string) {
+  return value.startsWith("/uploads/") || /\.(mp4|webm|mov)$/i.test(value);
+}
+
 function getCardCover(card: StoryCardDto) {
   if (card.mediaType === "image") {
     return parseImagePaths(card)[0] ?? "";
   }
 
-  return getVideoPosterUrl(card.mediaPathOrUrl, card.title);
+  return getVideoPosterUrl(card.mediaPathOrUrl);
 }
 
 function extractYouTubeId(urlString: string) {
@@ -267,7 +271,7 @@ function withAutoplayVideoUrl(value: string) {
   }
 }
 
-function getVideoPosterUrl(urlString: string, label: string) {
+function getVideoPosterUrl(urlString: string) {
   const id = extractYouTubeId(urlString);
   if (id) {
     return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
@@ -285,7 +289,6 @@ function getVideoPosterUrl(urlString: string, label: string) {
       <circle cx="250" cy="180" r="220" fill="url(#bg)" opacity="0.35"/>
       <circle cx="610" cy="240" r="180" fill="rgba(255,255,255,0.09)"/>
       <path d="M70 460c120-70 280-72 390 16 90 72 190 96 368 8V620H70z" fill="#81ecff" opacity="0.15"/>
-      <text x="74" y="88" fill="rgba(255,255,255,0.72)" font-size="42" font-family="Plus Jakarta Sans, sans-serif" font-weight="700">${label}</text>
     </svg>
   `)}`;
 }
@@ -528,14 +531,17 @@ export default function App() {
   }, [notice]);
 
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
 
     if (overlay) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     }
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
     };
   }, [overlay]);
 
@@ -769,7 +775,7 @@ export default function App() {
       setSelectedCardId(null);
       setNotice({
         tone: "success",
-        message: "故事卡片已删除。"
+        message: "已删除故事卡片"
       });
     } catch (error) {
       setNotice({
@@ -814,10 +820,6 @@ export default function App() {
               }
             : current
         );
-        setNotice({
-          tone: "success",
-          message: "新故事已保存并自动发布。"
-        });
       } else if (draft.cardId) {
         const updated = await api<StoryCardDto>(`/api/cards/${draft.cardId}`, {
           method: "PUT",
@@ -844,12 +846,10 @@ export default function App() {
             : current
         );
         setSelectedCardId(updated.id);
-        setNotice({
-          tone: "success",
-          message: "故事卡片已更新并自动发布。"
-        });
       }
 
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       setOverlay(null);
       setCardDraft(null);
       setCardEditorReturnTarget(null);
@@ -1518,6 +1518,190 @@ function EmptyTimelineCreateNode({
   );
 }
 
+function NativeVideoPoster({
+  src,
+  alt,
+  className
+}: {
+  src: string;
+  alt: string;
+  className: string;
+}) {
+  const [posterSrc, setPosterSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPosterSrc(null);
+
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.src = src;
+
+    const captureFrame = () => {
+      if (cancelled || !video.videoWidth || !video.videoHeight) {
+        return null;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        return null;
+      }
+
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const sampleCanvas = document.createElement("canvas");
+      sampleCanvas.width = 40;
+      sampleCanvas.height = Math.max(24, Math.round((canvas.height / Math.max(canvas.width, 1)) * 40));
+      const sampleContext = sampleCanvas.getContext("2d");
+
+      if (!sampleContext) {
+        return {
+          dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+          valid: true,
+          score: 1
+        };
+      }
+
+      sampleContext.drawImage(video, 0, 0, sampleCanvas.width, sampleCanvas.height);
+      const pixels = sampleContext.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height).data;
+
+      let luminanceTotal = 0;
+      let luminanceSquareTotal = 0;
+      let brightPixels = 0;
+      const sampleCount = pixels.length / 4;
+
+      for (let index = 0; index < pixels.length; index += 4) {
+        const r = pixels[index];
+        const g = pixels[index + 1];
+        const b = pixels[index + 2];
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        luminanceTotal += luminance;
+        luminanceSquareTotal += luminance * luminance;
+
+        if (luminance > 28) {
+          brightPixels += 1;
+        }
+      }
+
+      const average = luminanceTotal / Math.max(sampleCount, 1);
+      const variance = luminanceSquareTotal / Math.max(sampleCount, 1) - average * average;
+      const deviation = Math.sqrt(Math.max(variance, 0));
+      const brightRatio = brightPixels / Math.max(sampleCount, 1);
+      const valid = average > 26 || deviation > 18 || brightRatio > 0.14;
+      const score = average + deviation * 1.8 + brightRatio * 120;
+
+      return {
+        dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+        valid,
+        score
+      };
+    };
+
+    const captureAtTime = (time: number) =>
+      new Promise<{ dataUrl: string; valid: boolean; score: number } | null>((resolve) => {
+        if (time <= 0.001 || Math.abs(video.currentTime - time) < 0.001) {
+          resolve(captureFrame());
+          return;
+        }
+
+        const cleanup = () => {
+          video.removeEventListener("seeked", handleSeeked);
+          video.removeEventListener("error", handleSeekError);
+        };
+
+        const handleSeeked = () => {
+          cleanup();
+          resolve(captureFrame());
+        };
+
+        const handleSeekError = () => {
+          cleanup();
+          resolve(captureFrame());
+        };
+
+        video.addEventListener("seeked", handleSeeked);
+        video.addEventListener("error", handleSeekError);
+
+        try {
+          video.currentTime = Math.max(0, time);
+        } catch {
+          cleanup();
+          resolve(captureFrame());
+        }
+      });
+
+    const handleLoadedData = async () => {
+      const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+      const candidateTimes = Array.from(
+        new Set(
+          [0.9, 1.6, 2.4, 3.2, 4.2, 5.6, duration * 0.1, duration * 0.16, duration * 0.22, duration * 0.3]
+            .filter((value) => Number.isFinite(value) && value >= 0)
+            .map((value) => {
+              if (duration <= 0) {
+                return value;
+              }
+
+              return Math.min(Math.max(duration - 0.05, 0), value);
+            })
+            .map((value) => Number(value.toFixed(2)))
+        )
+      )
+        .filter((value) => value >= 0)
+        .sort((left, right) => left - right);
+
+      let fallbackFrame: { dataUrl: string; valid: boolean; score: number } | null = null;
+
+      for (const time of candidateTimes.length ? candidateTimes : [0]) {
+        const frame = await captureAtTime(time);
+
+        if (cancelled || !frame) {
+          return;
+        }
+
+        if (!fallbackFrame || frame.score > fallbackFrame.score) {
+          fallbackFrame = frame;
+        }
+
+        if (frame.valid) {
+          setPosterSrc(frame.dataUrl);
+          return;
+        }
+      }
+
+      if (fallbackFrame && !cancelled) {
+        setPosterSrc(fallbackFrame.dataUrl);
+      }
+    };
+
+    const handleError = () => {
+      if (!cancelled) {
+        setPosterSrc(null);
+      }
+    };
+
+    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("error", handleError);
+    video.load();
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("error", handleError);
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [src]);
+
+  return <img alt={alt} className={className} src={posterSrc ?? getVideoPosterUrl(src)} />;
+}
+
 function TimelineCard({
   align,
   card,
@@ -1537,6 +1721,8 @@ function TimelineCard({
   onEdit: () => void;
   onOpen: () => void;
 }) {
+  const showNativeVideoCover = card.mediaType === "video" && isNativeVideoUrl(card.mediaPathOrUrl);
+
   return (
     <div className="relative max-w-sm w-full">
       {ownerAuthenticated ? (
@@ -1556,20 +1742,40 @@ function TimelineCard({
         </div>
       ) : null}
       <div
-        className={`absolute -inset-4 ${align === "left" ? "bg-primary-container/10" : "bg-tertiary/10"} blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+        className={`absolute -inset-4 ${align === "left" ? "bg-primary-container/10" : "bg-tertiary/10"} blur-2xl rounded-full transition-opacity duration-500 ${
+          viewed ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
       />
       <button
-        className={`relative text-left bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-6 border border-outline-variant/20 ${
+        className={`relative text-left bg-surface-container-high/60 backdrop-blur-xl rounded-lg p-6 border transition-all duration-300 cursor-pointer overflow-hidden card-glow w-full ${
+          viewed
+            ? align === "left"
+              ? "border-primary/40"
+              : "border-tertiary/40"
+            : "border-outline-variant/20"
+        } ${
           align === "left" ? "hover:border-primary/40" : "hover:border-tertiary/40"
-        } transition-all duration-300 cursor-pointer overflow-hidden card-glow w-full`}
+        }`}
         onClick={onOpen}
       >
         <div className="relative">
-          <img
-            alt={card.title}
-            className="w-full h-48 object-cover rounded-md mb-6 grayscale group-hover:grayscale-0 transition-all duration-700"
-            src={cover}
-          />
+          {showNativeVideoCover ? (
+            <NativeVideoPoster
+              alt={card.title}
+              className={`w-full h-48 object-cover rounded-md mb-6 transition-all duration-700 ${
+                viewed ? "grayscale-0" : "grayscale group-hover:grayscale-0"
+              }`}
+              src={card.mediaPathOrUrl}
+            />
+          ) : (
+            <img
+              alt={card.title}
+              className={`w-full h-48 object-cover rounded-md mb-6 transition-all duration-700 ${
+                viewed ? "grayscale-0" : "grayscale group-hover:grayscale-0"
+              }`}
+              src={cover}
+            />
+          )}
         </div>
         <div className="absolute inset-x-6 top-6 h-16 rounded-full bg-white/5 blur-2xl opacity-60" />
         <h3 className="text-[1.22rem] md:text-[1.3rem] font-bold tracking-tight text-white mb-2 relative">{card.title}</h3>
@@ -2120,7 +2326,7 @@ function AvatarGeneratorOverlay({
                     aria-label="服装样式"
                     className="w-full bg-transparent border-0 border-b-[1.25px] border-outline-variant/30 focus:border-primary-container focus:ring-0 text-on-surface text-sm font-medium transition-all py-3 px-1 placeholder:text-outline-variant/50 outline-none"
                     onChange={(event) => patchPrompt("outfit", event.target.value)}
-                    placeholder="学院风"
+                    placeholder="如：学院风"
                     type="text"
                     value={displayPrompt.outfit}
                   />
@@ -2138,7 +2344,7 @@ function AvatarGeneratorOverlay({
                       event.currentTarget.style.height = "0px";
                       event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`;
                     }}
-                    placeholder="像游戏主角一样，安静但有发光感。"
+                    placeholder="如：像游戏主角一样，安静但有发光感。"
                     ref={notesTextareaRef}
                     rows={1}
                     value={displayPrompt.notes}
@@ -2297,22 +2503,145 @@ function CardDetailOverlay({
   const immersiveLayout = card.mediaType === "image";
   const [videoActivated, setVideoActivated] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [imageStageAspect, setImageStageAspect] = useState(0.78);
+  const [imageStageHeight, setImageStageHeight] = useState<number | null>(null);
+  const [imageCoverScale, setImageCoverScale] = useState(1);
+  const [imageCoverPosition, setImageCoverPosition] = useState("center");
+  const imageStageRef = useRef<HTMLDivElement | null>(null);
+  const detailContentRef = useRef<HTMLDivElement | null>(null);
+  const nativeVideoRef = useRef<HTMLVideoElement | null>(null);
   const detailCloseButtonClass =
     "absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-on-surface-variant transition-all duration-300 active:scale-90 group aspect-square flex items-center justify-center w-10 h-10";
-  const detailTitleClass = "text-[1.68rem] md:text-[2rem] font-black tracking-tight text-white leading-[1.08]";
+  const detailTitleClass = "text-[1.56rem] md:text-[1.88rem] font-black tracking-tight text-white leading-[1.08]";
   const detailOwnerActionsClass = "ml-auto mr-6 md:mr-8 flex items-center gap-2 shrink-0";
   const detailEditButtonClass =
     "flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 group active:scale-95";
   const detailDeleteButtonClass =
     "flex items-center gap-1 px-2 py-1 rounded-full bg-error/10 hover:bg-error/20 border border-error/20 transition-all duration-300 group active:scale-95";
+  const nextImage = () => setActiveImageIndex((current) => (current === images.length - 1 ? 0 : current + 1));
 
   useEffect(() => {
     setVideoActivated(false);
   }, [card.id, card.mediaPathOrUrl]);
 
   useEffect(() => {
+    if (!videoActivated || !isNativeVideo) {
+      return;
+    }
+
+    const target = nativeVideoRef.current;
+    if (!target) {
+      return;
+    }
+
+    const playWhenReady = async () => {
+      try {
+        await target.play();
+      } catch {
+        // Ignore autoplay rejections; native controls remain available.
+      }
+    };
+
+    if (target.readyState >= 2) {
+      void playWhenReady();
+      return;
+    }
+
+    const handleCanPlay = () => {
+      void playWhenReady();
+    };
+
+    target.addEventListener("canplay", handleCanPlay, { once: true });
+
+    return () => {
+      target.removeEventListener("canplay", handleCanPlay);
+    };
+  }, [videoActivated, isNativeVideo, videoUrl]);
+
+  useEffect(() => {
     setActiveImageIndex(0);
   }, [card.id, card.mediaPathOrUrl]);
+
+  useEffect(() => {
+    if (!immersiveLayout || !images.length) {
+      setImageStageAspect(0.78);
+      return;
+    }
+
+    let active = true;
+
+    new Promise<number>((resolve) => {
+      const image = new window.Image();
+      image.onload = () => resolve(image.naturalWidth / Math.max(image.naturalHeight, 1));
+      image.onerror = () => resolve(0.78);
+      image.src = images[0];
+    }).then((ratio) => {
+      if (!active) {
+        return;
+      }
+
+      const safeRatio = Number.isFinite(ratio) && ratio > 0 ? ratio : 0.78;
+      setImageStageAspect(Math.max(0.62, Math.min(1.12, safeRatio)));
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [immersiveLayout, card.id, card.mediaPathOrUrl]);
+
+  useLayoutEffect(() => {
+    if (!immersiveLayout) {
+      setImageStageHeight(null);
+      setImageCoverScale(1);
+      setImageCoverPosition("center");
+      return;
+    }
+
+    const updateStageHeight = () => {
+      const stageWidth = imageStageRef.current?.offsetWidth ?? 0;
+      const contentHeight = detailContentRef.current?.scrollHeight ?? 0;
+
+      if (!stageWidth) {
+        return;
+      }
+
+      const baseHeight = stageWidth / Math.max(imageStageAspect, 0.01);
+      const nextHeight = Math.max(baseHeight, contentHeight);
+      setImageStageHeight(nextHeight);
+
+      const stretchedForContent = nextHeight - baseHeight > 6;
+      if (!stretchedForContent) {
+        setImageCoverScale(1);
+        setImageCoverPosition("center");
+        return;
+      }
+
+      const ratio = nextHeight / Math.max(baseHeight, 1);
+      setImageCoverScale(Math.min(1.18, Math.max(1.05, ratio)));
+      setImageCoverPosition("center bottom");
+    };
+
+    updateStageHeight();
+
+    const observer = new ResizeObserver(() => {
+      updateStageHeight();
+    });
+
+    if (imageStageRef.current) {
+      observer.observe(imageStageRef.current);
+    }
+
+    if (detailContentRef.current) {
+      observer.observe(detailContentRef.current);
+    }
+
+    window.addEventListener("resize", updateStageHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateStageHeight);
+    };
+  }, [immersiveLayout, imageStageAspect, card.id, card.mediaPathOrUrl]);
 
   if (immersiveLayout) {
     return (
@@ -2341,24 +2670,29 @@ function CardDetailOverlay({
           >
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
-          <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12 h-full overflow-hidden">
-            <div className="flex-shrink-0 w-full lg:w-[45%] h-64 lg:h-auto">
-              <div className="relative w-full h-full group">
+          <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-start gap-8 lg:gap-12 h-full overflow-hidden">
+            <div className="flex-shrink-0 w-full lg:w-[45%] lg:self-start">
+              <div
+                ref={imageStageRef}
+                className="relative mx-auto w-full group"
+                style={imageStageHeight ? { height: `${imageStageHeight}px` } : { aspectRatio: `${imageStageAspect}` }}
+              >
                 <div className="absolute -top-12 -left-12 w-48 h-48 nebula-glow opacity-50" />
                 <div className="absolute -bottom-12 -right-12 w-48 h-48 nebula-glow opacity-30" />
-                <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl">
+                <div className="relative h-full w-full overflow-hidden rounded-lg border border-white/5 shadow-2xl">
                   <img
                     alt={card.title}
-                    className="w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 will-change-transform"
                     src={images[activeImageIndex] ?? images[0]}
+                    style={{ transform: `scale(${imageCoverScale})`, objectPosition: imageCoverPosition }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   {images.length > 1 ? (
                     <>
                       <button
                         aria-label="查看下一张图片"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/12 backdrop-blur-md text-white/72 hover:text-white hover:bg-white/18 transition-all duration-300 flex items-center justify-center shadow-[0_6px_20px_rgba(0,0,0,0.14)]"
-                        onClick={() => setActiveImageIndex((current) => (current === images.length - 1 ? 0 : current + 1))}
+                        className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/14 backdrop-blur-md text-white/84 hover:bg-white/22 hover:text-white transition-all duration-300 shadow-[0_10px_24px_rgba(0,0,0,0.2)]"
+                        onClick={nextImage}
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[18px]">chevron_right</span>
@@ -2369,7 +2703,7 @@ function CardDetailOverlay({
               </div>
             </div>
 
-            <div className="flex-1 min-w-0 flex flex-col overflow-y-auto custom-scrollbar pr-2">
+            <div ref={detailContentRef} className="flex-1 min-w-0 flex flex-col overflow-y-auto custom-scrollbar pr-2">
               <div className="flex items-center mb-4 gap-3 flex-wrap">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary-dim bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                   {card.themeKey}
@@ -2441,30 +2775,46 @@ function CardDetailOverlay({
           <span className="material-symbols-outlined text-xl">close</span>
         </button>
 
-        <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12 h-full overflow-hidden">
-          <div className="flex-shrink-0 w-full lg:w-[45%] h-64 lg:h-auto">
-            <div className="relative w-full h-full group">
+        <div className="p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-start gap-8 lg:gap-12 h-full overflow-hidden">
+          <div className="flex-shrink-0 w-full lg:w-[47%] lg:self-center">
+            <div className="relative mx-auto w-full max-w-[548px] h-[330px] sm:h-[384px] lg:h-[458px] group">
               <div className="absolute -top-12 -left-12 w-48 h-48 nebula-glow opacity-50" />
               <div className="absolute -bottom-12 -right-12 w-48 h-48 nebula-glow opacity-30" />
-              <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl bg-black">
-                {videoActivated && isNativeVideo && videoUrl ? (
-                  <video className="absolute inset-0 w-full h-full object-cover" controls autoPlay playsInline src={videoUrl} />
-                ) : videoActivated && videoUrl ? (
-                  <iframe
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                    src={withAutoplayVideoUrl(videoUrl)}
-                    title={card.title}
-                  />
-                ) : (
-                  <img
-                    alt={card.title}
-                    className="absolute inset-0 w-full h-full object-cover scale-[1.3] group-hover:scale-125 transition-transform duration-1000"
-                    src={getVideoPosterUrl(card.mediaPathOrUrl, card.title)}
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/5 shadow-2xl bg-black">
+                  {videoActivated && isNativeVideo && videoUrl ? (
+                    <div className="absolute inset-[2px] sm:inset-[3px] rounded-[17px] overflow-hidden bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] px-[2px] sm:px-[3px] py-[10px] sm:py-[11px] flex items-center justify-center">
+                      <video ref={nativeVideoRef} className="h-full w-full rounded-[15px] object-contain bg-black" controls autoPlay playsInline src={videoUrl} />
+                    </div>
+                  ) : videoActivated && videoUrl ? (
+                    <div className="absolute inset-[2px] sm:inset-[3px] rounded-[17px] overflow-hidden bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] px-[2px] sm:px-[3px] py-[10px] sm:py-[11px] flex items-center justify-center">
+                      <iframe
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="h-full w-full rounded-[15px]"
+                        src={withAutoplayVideoUrl(videoUrl)}
+                        title={card.title}
+                      />
+                    </div>
+                  ) : (
+                    <div className="absolute inset-[2px] sm:inset-[3px] rounded-[17px] overflow-hidden bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] px-[2px] sm:px-[3px] py-[13px] sm:py-[14px] flex items-center justify-center">
+                      {isNativeVideo && videoUrl ? (
+                        <NativeVideoPoster
+                          alt={card.title}
+                          className="h-full w-full rounded-[15px] object-contain bg-black"
+                          src={videoUrl}
+                        />
+                      ) : (
+                        <img
+                          alt={card.title}
+                          className="h-full w-full rounded-[15px] object-contain bg-black"
+                          src={getVideoPosterUrl(card.mediaPathOrUrl)}
+                        />
+                      )}
+                    </div>
+                  )}
+                {!videoActivated ? (
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-transparent" />
+                ) : null}
                 {!videoActivated ? (
                   <button
                     className="absolute inset-0 flex items-center justify-center"
@@ -2610,19 +2960,6 @@ function CardEditorOverlay({
   }, [localDraft.mediaType]);
 
   useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-    };
-  }, []);
-
-  useEffect(() => {
     return () => {
       if (videoUploadPreviewUrl?.startsWith("blob:")) {
         URL.revokeObjectURL(videoUploadPreviewUrl);
@@ -2699,8 +3036,13 @@ function CardEditorOverlay({
 
       try {
         const uploaded: string[] = [];
+        const maxImageBytes = 100 * 1024 * 1024;
 
         for (const file of Array.from(files)) {
+          if (file.size > maxImageBytes) {
+            throw new Error("图片文件不能超过 100MB。");
+          }
+
           const formData = new FormData();
           formData.append("file", file);
           const result = await api<{ path: string }>("/api/upload", {
@@ -2759,6 +3101,12 @@ function CardEditorOverlay({
     }
 
     if (localDraft.mediaType === "image" && !localDraft.imagePaths.length) {
+      window.alert("请先上传至少一张图片。");
+      return;
+    }
+
+    if (localDraft.mediaType === "video" && !localDraft.videoPath.trim()) {
+      window.alert("请先上传视频，或粘贴可嵌入的视频链接。");
       return;
     }
 
@@ -2770,9 +3118,13 @@ function CardEditorOverlay({
     onSave(localDraft);
   }
 
+  const isLocalVideoSource = (value: string) =>
+    value.startsWith("/uploads/") || value.endsWith(".mp4") || value.endsWith(".webm") || value.endsWith(".mov");
   const videoPreview = toEmbeddableVideoUrl(localDraft.videoPath);
   const activeVideoPreview = videoUploading ? videoUploadPreviewUrl : videoPreview;
   const isVideoLinkConfirmed = Boolean(videoPreview && videoUrlInput.trim() && videoUrlInput.trim() === localDraft.videoPath.trim());
+  const hasLocalUploadedVideo = Boolean(localDraft.mediaType === "video" && localDraft.videoPath && isLocalVideoSource(localDraft.videoPath));
+  const showVideoLinkField = !videoUploading && !hasLocalUploadedVideo;
   const selectChevron =
     "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a9a7a7' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")";
   const fieldLabelClass = "mb-3 block text-xs font-bold uppercase tracking-widest text-on-surface-variant";
@@ -2790,12 +3142,10 @@ function CardEditorOverlay({
   const reflectionFieldClass =
     `${deepFieldSurfaceClass} ${elevatedContentTextClass} resize-none px-5 py-4 text-sm leading-relaxed placeholder:text-on-surface-variant/30 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_20px_rgba(129,236,255,0.1)]`;
   const uploadHintIndex = Math.min(localDraft.imagePaths.length, 2);
-  const isLocalVideoSource = (value: string) =>
-    value.startsWith("/uploads/") || value.endsWith(".mp4") || value.endsWith(".webm") || value.endsWith(".mov");
 
   return (
     <div className="fixed inset-0 z-[115] overflow-hidden">
-      <div className="fixed inset-0 bg-surface-container-lowest/52 backdrop-blur-[28px] [backdrop-filter:blur(28px)_saturate(0.55)_brightness(0.6)]" />
+      <div className="fixed inset-0 bg-surface-container-lowest/66 backdrop-blur-[30px] [backdrop-filter:blur(30px)_saturate(0.42)_brightness(0.42)]" />
       <div
         ref={overlayScrollRef}
         className={`absolute inset-0 ${
@@ -2982,10 +3332,10 @@ function CardEditorOverlay({
                               </div>
                               <div className="mt-2 flex min-h-[28px] flex-col items-center justify-start">
                                 {index === uploadHintIndex ? (
-                                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500 opacity-80">最大限制 24MB</p>
+                                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500 opacity-80">最大限制 100MB</p>
                                 ) : (
                                   <p className="invisible text-[10px] font-medium uppercase tracking-[0.15em]" aria-hidden="true">
-                                    最大限制 24MB
+                                    最大限制 100MB
                                   </p>
                                 )}
                               </div>
@@ -3000,7 +3350,7 @@ function CardEditorOverlay({
                   <div className="space-y-6">
                     {videoUploading && videoUploadPreviewUrl ? (
                       <div className="relative aspect-video overflow-hidden rounded-[28px] border border-white/10 bg-black">
-                        <video className="h-full w-full object-cover opacity-60" loop muted playsInline autoPlay src={videoUploadPreviewUrl} />
+                        <video className="h-full w-full object-contain bg-black opacity-60" loop muted playsInline autoPlay src={videoUploadPreviewUrl} />
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/40 backdrop-blur-sm">
                           <div className="relative mb-4 h-16 w-16">
                             <div className="absolute inset-0 animate-[spin_3s_linear_infinite] rounded-full border-2 border-tertiary/20 border-t-tertiary" />
@@ -3038,13 +3388,13 @@ function CardEditorOverlay({
                     ) : activeVideoPreview ? (
                       <div className="relative aspect-video overflow-hidden rounded-[28px] border border-white/10 bg-black">
                         {isLocalVideoSource(activeVideoPreview) ? (
-                          <video className="h-full w-full object-cover" controls muted playsInline src={activeVideoPreview} />
+                          <video className="h-full w-full object-contain bg-black" controls muted playsInline src={activeVideoPreview} />
                         ) : (
                           <iframe
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                             className="h-full w-full"
-                            src={withAutoplayVideoUrl(activeVideoPreview)}
+                            src={activeVideoPreview}
                             title="Video preview"
                           />
                         )}
@@ -3096,46 +3446,48 @@ function CardEditorOverlay({
                       </div>
                     )}
 
-                    <div className="group mt-6 flex items-center relative">
-                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                        <span className="material-symbols-outlined text-xl text-tertiary/70">link</span>
+                    {showVideoLinkField ? (
+                      <div className="group mt-6 flex items-center relative">
+                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                          <span className="material-symbols-outlined text-xl text-tertiary/70">link</span>
+                        </div>
+                        <input
+                          className="w-full rounded-full border border-outline-variant/40 bg-surface-container-low/40 backdrop-blur-md py-4 pl-14 pr-12 text-sm italic text-on-surface placeholder:text-outline-variant/40 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_25px_rgba(129,236,255,0.1)] transition-all outline-none font-mono"
+                          onChange={(event) => setVideoUrlInput(event.target.value)}
+                          placeholder="或粘贴视频链接"
+                          value={videoUrlInput}
+                        />
+                        <button
+                          className={`absolute right-4 flex items-center justify-center p-1 transition-colors ${
+                            isVideoLinkConfirmed ? "text-neutral-500 hover:text-primary" : "text-on-surface-variant hover:text-primary"
+                          }`}
+                          onClick={() => {
+                            const nextValue = videoUrlInput.trim();
+
+                            if (!nextValue) {
+                              return;
+                            }
+
+                            if (!toEmbeddableVideoUrl(nextValue)) {
+                              window.alert("请输入可嵌入的视频链接，或先上传短视频。");
+                              return;
+                            }
+
+                            setLocalDraft((current) => ({
+                              ...current,
+                              videoPath: nextValue
+                            }));
+                          }}
+                          type="button"
+                        >
+                          {isVideoLinkConfirmed ? (
+                            <span className="material-symbols-outlined text-xl">check</span>
+                          ) : (
+                            <span className="px-2 text-[11px] font-black uppercase tracking-widest opacity-40">确认</span>
+                          )}
+                        </button>
                       </div>
-                      <input
-                        className="w-full rounded-full border border-outline-variant/40 bg-surface-container-low/40 backdrop-blur-md py-4 pl-14 pr-12 text-sm italic text-on-surface placeholder:text-outline-variant/40 focus:border-tertiary/50 focus:ring-0 focus:shadow-[0_0_25px_rgba(129,236,255,0.1)] transition-all outline-none font-mono"
-                        onChange={(event) => setVideoUrlInput(event.target.value)}
-                        placeholder="或粘贴视频链接"
-                        value={videoUrlInput}
-                      />
-                      <button
-                        className={`absolute right-4 flex items-center justify-center p-1 transition-colors ${
-                          isVideoLinkConfirmed ? "text-neutral-500 hover:text-primary" : "text-on-surface-variant hover:text-primary"
-                        }`}
-                        onClick={() => {
-                          const nextValue = videoUrlInput.trim();
-
-                          if (!nextValue) {
-                            return;
-                          }
-
-                          if (!toEmbeddableVideoUrl(nextValue)) {
-                            window.alert("请输入可嵌入的视频链接，或先上传短视频。");
-                            return;
-                          }
-
-                          setLocalDraft((current) => ({
-                            ...current,
-                            videoPath: nextValue
-                          }));
-                        }}
-                        type="button"
-                      >
-                        {isVideoLinkConfirmed ? (
-                          <span className="material-symbols-outlined text-xl">check</span>
-                        ) : (
-                          <span className="px-2 text-[11px] font-black uppercase tracking-widest opacity-40">确认</span>
-                        )}
-                      </button>
-                    </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -3144,7 +3496,7 @@ function CardEditorOverlay({
 
             <div className={`mt-9 flex items-center justify-end gap-3 md:mt-11 ${isVideoMode ? "" : "shrink-0"}`}>
               <button
-                className={`px-4 py-3 rounded-full ${elevatedContentTextClass} font-bold hover:text-on-surface transition-all duration-300 text-sm tracking-[0.18em] uppercase`}
+                className={`px-4 py-3 rounded-full ${elevatedContentTextClass} font-bold hover:text-white transition-all duration-300 text-sm tracking-[0.18em] uppercase`}
                 onClick={confirmClose}
                 type="button"
               >
