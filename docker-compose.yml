@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APT_MIRROR: mirrors.aliyun.com
     image: the-explorer:production
     restart: unless-stopped
     env_file:

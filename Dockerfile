@@ -3,9 +3,18 @@
 FROM node:22-bookworm-slim AS deps
 
 WORKDIR /app
-ENV DATABASE_URL=file:/tmp/the-explorer-build.db
+ENV DATABASE_URL=file:/tmp/the-explorer-build.db \
+  NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+ARG APT_MIRROR=mirrors.aliyun.com
 
-RUN apt-get update \
+RUN set -eux; \
+  printf '%s\n' \
+    "deb http://${APT_MIRROR}/debian bookworm main contrib non-free non-free-firmware" \
+    "deb http://${APT_MIRROR}/debian bookworm-updates main contrib non-free non-free-firmware" \
+    "deb http://${APT_MIRROR}/debian-security bookworm-security main contrib non-free non-free-firmware" \
+    > /etc/apt/sources.list; \
+  rm -f /etc/apt/sources.list.d/*.sources; \
+  apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates openssl \
   && rm -rf /var/lib/apt/lists/*
 
@@ -20,10 +29,19 @@ RUN npm run build
 FROM node:22-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \
-  DATABASE_URL=file:/app/storage/the-explorer-prod.db
+  DATABASE_URL=file:/app/storage/the-explorer-prod.db \
+  NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
 WORKDIR /app
+ARG APT_MIRROR=mirrors.aliyun.com
 
-RUN apt-get update \
+RUN set -eux; \
+  printf '%s\n' \
+    "deb http://${APT_MIRROR}/debian bookworm main contrib non-free non-free-firmware" \
+    "deb http://${APT_MIRROR}/debian bookworm-updates main contrib non-free non-free-firmware" \
+    "deb http://${APT_MIRROR}/debian-security bookworm-security main contrib non-free non-free-firmware" \
+    > /etc/apt/sources.list; \
+  rm -f /etc/apt/sources.list.d/*.sources; \
+  apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates openssl \
   && rm -rf /var/lib/apt/lists/*
 
