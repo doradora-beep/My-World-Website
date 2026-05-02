@@ -3,6 +3,10 @@ dist
 server/dist
 storage/uploads
 .env
+.env.production
+.env.local
+.env.*.local
+.vercel
 .tools
 .DS_Store
 coverage
